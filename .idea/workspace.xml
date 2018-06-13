@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9da63616-958f-4ad2-af4e-e1bd9d8f4fd6" name="Default" comment="">
-      <change afterPath="$PROJECT_DIR$/db_test.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/types.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/db.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/rows.go" beforeDir="false" afterPath="$PROJECT_DIR$/rows.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/db_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/db_test.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -29,8 +25,8 @@
       <file leaf-file-name="db_test.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/db_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="143">
-              <caret line="49" column="38" selection-start-line="49" selection-start-column="38" selection-end-line="49" selection-end-column="38" />
+            <state relative-caret-position="221">
+              <caret line="83" column="62" selection-start-line="83" selection-start-column="62" selection-end-line="83" selection-end-column="62" />
               <folding>
                 <element signature="e#14#39#0" expanded="true" />
               </folding>
@@ -148,7 +144,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Test.db_test.go">
+  <component name="RunManager" selected="Go Test.Test_db in godb">
     <configuration name="Test_db in godb" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="godb" />
       <working_directory value="$PROJECT_DIR$" />
@@ -176,18 +172,12 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Test.db_test.go" />
         <item itemvalue="Go Test.Test_db in godb" />
+        <item itemvalue="Go Test.db_test.go" />
       </list>
     </recent_temporary>
   </component>
   <component name="TestHistory">
-    <history-entry file="Test_db_in_godb - 2018.06.13 at 21h 55m 02s.xml">
-      <configuration name="Test_db in godb" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="Test_db_in_godb - 2018.06.13 at 22h 13m 19s.xml">
-      <configuration name="Test_db in godb" configurationId="GoTestRunConfiguration" />
-    </history-entry>
     <history-entry file="Test_db_in_godb - 2018.06.13 at 22h 13m 58s.xml">
       <configuration name="Test_db in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
@@ -196,6 +186,27 @@
     </history-entry>
     <history-entry file="db_test_go - 2018.06.13 at 22h 26m 47s.xml">
       <configuration name="db_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="db_test_go - 2018.06.13 at 22h 50m 37s.xml">
+      <configuration name="db_test.go" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="Test_db_in_godb - 2018.06.13 at 22h 57m 27s.xml">
+      <configuration name="Test_db in godb" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="Test_db_in_godb - 2018.06.13 at 22h 57m 47s.xml">
+      <configuration name="Test_db in godb" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="Test_db_in_godb - 2018.06.13 at 22h 58m 15s.xml">
+      <configuration name="Test_db in godb" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="Test_db_in_godb - 2018.06.13 at 22h 58m 50s.xml">
+      <configuration name="Test_db in godb" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="Test_db_in_godb - 2018.06.13 at 23h 00m 12s.xml">
+      <configuration name="Test_db in godb" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="Test_db_in_godb - 2018.06.13 at 23h 01m 21s.xml">
+      <configuration name="Test_db in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
   </component>
   <component name="ToolWindowManager">
@@ -207,7 +218,7 @@
       <window_info anchor="bottom" id="Event Log" side_tool="true" />
       <window_info anchor="right" id="Database" />
       <window_info anchor="bottom" id="Database Changes" show_stripe_button="false" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.33224756" />
+      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.4315961" />
       <window_info anchor="bottom" id="Version Control" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" />
@@ -252,8 +263,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/db_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="143">
-          <caret line="49" column="38" selection-start-line="49" selection-start-column="38" selection-end-line="49" selection-end-column="38" />
+        <state relative-caret-position="221">
+          <caret line="83" column="62" selection-start-line="83" selection-start-column="62" selection-end-line="83" selection-end-column="62" />
           <folding>
             <element signature="e#14#39#0" expanded="true" />
           </folding>

@@ -5,7 +5,6 @@ import (
 	"time"
 	"fmt"
 	"testing"
-	"strconv"
 )
 
 var(
@@ -47,7 +46,7 @@ func init()  {
 func Test_db(t *testing.T)  {
 	fmt.Println("test_db...")
 
-	db,err:=Open("mysql","root:123456@/testdb?charset=utf8")
+	db,err:=Open("mysql","root:123456@/testdb?charset=utf8&parseTime=true")
 	if err!=nil{
 		t.Error(err)
 	}
@@ -61,7 +60,7 @@ func Test_db(t *testing.T)  {
 	if err != nil {
 		t.Error(err)
 	}
-
+    /*
 	for i := 0; i < 100; i++ {
 		name:="cly"+strconv.Itoa(i)
 		_, err = db.Exec("insert into t_test (`username`, password, price, sex, createdTime) values (?,?,?,?,?)",
@@ -69,6 +68,20 @@ func Test_db(t *testing.T)  {
 		if err != nil {
 			t.Error(err)
 		}
+	}*/
+
+	rows,err := db.Query("select * from t_test")
+	for rows.Next()  {
+		var Id int
+		var Username ,Password string
+		var Price float32
+		var Sex int
+		var CreatedTime time.Time
+		err = rows.Scan(&Id,&Username,&Password,&Price,&Sex,&CreatedTime)
+		if err!=nil {
+			t.Error(err)
+		}
+		fmt.Println(Id,Username,Password,Price,Sex,CreatedTime)
 	}
 
 }
