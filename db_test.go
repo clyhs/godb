@@ -43,10 +43,19 @@ func init()  {
 	fmt.Println("db_test init...")
 }
 
+func testopen() (*DB,error) {
+
+	db,err:=Open("mysql","root:123456@/testdb?charset=utf8&parseTime=true")
+	if err!=nil{
+		return nil,err
+	}
+	return db,nil
+}
+
 func Test_db(t *testing.T)  {
 	fmt.Println("test_db...")
 
-	db,err:=Open("mysql","root:123456@/testdb?charset=utf8&parseTime=true")
+	db,err:=testopen()
 	if err!=nil{
 		t.Error(err)
 	}
@@ -85,3 +94,33 @@ func Test_db(t *testing.T)  {
 	}
 
 }
+
+func Test_Query(t *testing.T)  {
+	db,err:=testopen()
+	if err!=nil{
+		t.Error(err)
+	}
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+
+	rows,err := db.Query("select * from t_test limit 0,5")
+	for rows.Next()  {
+		var Id int
+		var Username ,Password string
+		var Price float32
+		var Sex int
+		var CreatedTime time.Time
+		err = rows.Scan(&Id,&Username,&Password,&Price,&Sex,&CreatedTime)
+		if err!=nil {
+			t.Error(err)
+		}
+		fmt.Println(Id,Username,Password,Price,Sex,CreatedTime)
+	}
+	rows.Close()
+
+}
+

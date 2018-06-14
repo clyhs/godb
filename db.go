@@ -1,6 +1,10 @@
 package godb
 
-import "database/sql"
+import (
+	"database/sql"
+)
+
+
 
 type DB struct {
 	*sql.DB
@@ -13,3 +17,4 @@ func Open(driverName string,dataSourceName string)(*DB,error)  {
 	}
 	return &DB{db},nil
 }
+
