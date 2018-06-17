@@ -43,7 +43,7 @@ func MapToSlice(query string, mp interface{}) (string, []interface{}, error) {
 	if vv.Kind() != reflect.Ptr || vv.Elem().Kind() != reflect.Map {
 		return "", []interface{}{}, ErrNullPointer
 	}
-	
+
 	args := make([]interface{}, 0, len(vv.Elem().MapKeys()))
 	var err error
 	query = re.ReplaceAllStringFunc(query, func(src string) string {

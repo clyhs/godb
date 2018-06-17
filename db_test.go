@@ -5,6 +5,7 @@ import (
 	"time"
 	"fmt"
 	"testing"
+	"reflect"
 )
 
 var(
@@ -124,3 +125,139 @@ func Test_Query(t *testing.T)  {
 
 }
 
+func Test_ScanStructByIndex(t *testing.T)  {
+
+	db,err:=testopen()
+	if err!=nil{
+		t.Error(err)
+	}
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	rows,err := db.Query("select * from t_test limit 0,5")
+	for rows.Next() {
+		var user User
+		err = rows.ScanStructByIndex(&user)
+		if err != nil {
+			t.Error(err)
+		}
+		fmt.Println(user)
+
+	}
+	rows.Close()
+
+}
+
+func Test_ScanMap(t *testing.T)  {
+
+	db,err:=testopen()
+	if err!=nil{
+		t.Error(err)
+	}
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	rows, err := db.Query("select * from t_test limit 0,10")
+	if err != nil {
+		t.Error(err)
+	}
+
+	for rows.Next() {
+		m := make(map[string]interface{})
+		err = rows.ScanMap(&m)
+		if err != nil {
+			t.Error(err)
+		}
+		fmt.Println(m)
+	}
+
+	rows.Close()
+}
+
+func Test_select(t *testing.T)  {
+
+	db,err:=testopen()
+	if err!=nil{
+		t.Error(err)
+	}
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	rows,err := db.Query("select * from t_test limit 0,10")
+
+	columns, _ := rows.Columns()
+	scanArgs := make([]interface{}, len(columns))
+	values := make([]interface{}, len(columns))
+	for i := range values {
+		scanArgs[i] = &values[i]
+	}
+
+	for rows.Next() {
+		//将行数据保存到record字典
+		err = rows.Scan(scanArgs...)
+		record := make(map[string]interface{})
+		for i, col := range values {
+			if col != nil {
+				if(reflect.TypeOf(col) ==reflect.TypeOf(time.Time{}) ){
+					record[columns[i]] =  col;
+				}else{
+					record[columns[i]] = string(col.([]byte));
+				}
+			}
+		}
+		fmt.Println(record)
+	}
+}
+
+func Test_ReflectMap(t *testing.T)  {
+	db,err:=testopen()
+	if err!=nil{
+		t.Error(err)
+	}
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	rows,err := db.Query("select * from t_test limit 0,10")
+
+	cols, _ := rows.Columns()
+	newDest := make([]interface{}, len(cols))
+
+	for rows.Next() {
+		m := make(map[string]interface{})
+		vv := reflect.ValueOf(&m)
+		vvv := vv.Elem()
+		for i, _ := range cols {
+			//var value reflect.Value
+			value := reflect.MakeSlice(reflect.SliceOf(vvv.Type().Elem()), DefaultCacheSize, DefaultCacheSize)
+			newDest[i] = value.Index(i).Addr().Interface()
+		}
+		err = rows.Scan(newDest...)
+		if err != nil {
+			t.Error(err)
+		}
+
+		for i, name := range cols {
+			vname := reflect.ValueOf(name)
+			vvv.SetMapIndex(vname, reflect.ValueOf(newDest[i]).Elem())
+		}
+
+		fmt.Println(m)
+
+	}
+
+
+
+
+}
