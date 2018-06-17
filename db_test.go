@@ -257,7 +257,37 @@ func Test_ReflectMap(t *testing.T)  {
 
 	}
 
+}
+
+func Test_ScanSlice(t *testing.T)  {
+
+	db,err:=testopen()
+	if err!=nil{
+		t.Error(err)
+	}
+	err = db.Ping()
+	if err != nil {
+		panic(err.Error())
+	}
+	defer db.Close()
+
+	rows, err := db.Query("select * from t_test limit 0,10")
+	if err != nil {
+		t.Error(err)
+	}
+
+	cols, _ := rows.Columns()
 
 
+	for rows.Next() {
+		slice := make([]interface{}, len(cols))
+		err = rows.ScanSlice(&slice)
+		if err != nil {
+			t.Error(err)
+		}
+		t.Log(slice)
+		fmt.Println(slice)
+	}
 
+	rows.Close()
 }

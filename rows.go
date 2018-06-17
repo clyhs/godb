@@ -78,6 +78,40 @@ func (rs *Rows) ScanMap(dest interface{}) error {
 	return nil
 }
 
+func (rs *Rows) ScanSlice(dest interface{}) error {
+	vv := reflect.ValueOf(dest)
+	if vv.Kind() != reflect.Ptr || vv.Elem().Kind() != reflect.Slice {
+		return errors.New("dest should be a slice's pointer")
+	}
+
+	vvv := vv.Elem()
+	cols, err := rs.Columns()
+	if err != nil {
+		return err
+	}
+
+	newDest := make([]interface{}, len(cols))
+
+	for j := 0; j < len(cols); j++ {
+		if j >= vvv.Len() {
+			newDest[j] = reflect.New(vvv.Type().Elem()).Interface()
+		} else {
+			newDest[j] = vvv.Index(j).Addr().Interface()
+		}
+	}
+
+	err = rs.Rows.Scan(newDest...)
+	if err != nil {
+		return err
+	}
+
+	srcLen := vvv.Len()
+	for i := srcLen; i < len(cols); i++ {
+		vvv = reflect.Append(vvv, reflect.ValueOf(newDest[i]).Elem())
+	}
+	return nil
+}
+
 type Row struct {
 	rows *Rows
 	// One of these two will be non-nil:
