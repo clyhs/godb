@@ -1,9 +1,9 @@
 package godb
 
 import (
-	"time"
 	"testing"
 	"fmt"
+	"time"
 )
 
 func Test_StructToSlice(t *testing.T)  {
@@ -12,7 +12,8 @@ func Test_StructToSlice(t *testing.T)  {
 		Password:"123",
 		Price:0.1,
 		Sex:1,
-		CreateTime:time.Now()}
+		CreateTime:NullTime{time.Now(),true},
+	}
 
 	query,args,err:=StructToSlice("select * from t_test where `username`=?Username",&user);
 	if err!=nil{

@@ -2,17 +2,16 @@ package godb
 
 import (
 	"database/sql"
-	"errors"
-	"reflect"
-	"fmt"
 )
 
-type Rows struct {
-	*sql.Rows
-	db *DB
+type RowsMap struct {
+	Rows *sql.Rows
+	dbUtils *DbUtils
 }
 
-func (rs *Rows)ScanStructByIndex(dest ...interface{}) error {
+
+/*
+func (rsMap *RowsMap)ScanStructByIndex(dest ...interface{}) error {
 
 	if len(dest) == 0 {
 		return errors.New("at least one struct")
@@ -27,7 +26,7 @@ func (rs *Rows)ScanStructByIndex(dest ...interface{}) error {
 		vvvs[i] = vv.Elem()
 	}
 
-	cols, err := rs.Columns()
+	cols, err := rsMap.Rows.Columns()
 	if err != nil {
 		return err
 	}
@@ -41,16 +40,16 @@ func (rs *Rows)ScanStructByIndex(dest ...interface{}) error {
 		}
 	}
 
-	return rs.Rows.Scan(newDest...)
+	return rsMap.Rows.Scan(newDest...)
 }
 
-func (rs *Rows) ScanMap(dest interface{}) error {
+func (rsMap *RowsMap) ScanMap(dest interface{}) error {
 	vv := reflect.ValueOf(dest)
 	if vv.Kind() != reflect.Ptr || vv.Elem().Kind() != reflect.Map {
 		return errors.New("dest should be a map's pointer")
 	}
 
-	cols, err := rs.Columns()
+	cols, err := rsMap.Rows.Columns()
 	if err != nil {
 		return err
 	}
@@ -59,33 +58,34 @@ func (rs *Rows) ScanMap(dest interface{}) error {
 	vvv := vv.Elem()
 
 	for i, _ := range cols {
-		newDest[i] = rs.db.reflectNew(vvv.Type().Elem()).Interface()
+		newDest[i] = rsMap.DbUtils.reflectNew(vvv.Type().Elem()).Interface()
+
 	}
 
-	err = rs.Rows.Scan(newDest...)
+	err = rsMap.Rows.Scan(newDest...)
 	if err != nil {
 		return err
 	}
 
 	for i, name := range cols {
 		vname := reflect.ValueOf(name)
-		fmt.Println(reflect.TypeOf(newDest[i]))
-		fmt.Println(reflect.ValueOf(newDest[i]))
-		fmt.Println(reflect.ValueOf(newDest[i]).Elem())
+		//fmt.Println(reflect.TypeOf(newDest[i]))
+		//fmt.Println(reflect.ValueOf(newDest[i]))
+		//fmt.Println(reflect.ValueOf(newDest[i]).Elem())
 		vvv.SetMapIndex(vname, reflect.ValueOf(newDest[i]).Elem())
 	}
 
 	return nil
 }
 
-func (rs *Rows) ScanSlice(dest interface{}) error {
+func (rsMap *RowsMap) ScanSlice(dest interface{}) error {
 	vv := reflect.ValueOf(dest)
 	if vv.Kind() != reflect.Ptr || vv.Elem().Kind() != reflect.Slice {
 		return errors.New("dest should be a slice's pointer")
 	}
 
 	vvv := vv.Elem()
-	cols, err := rs.Columns()
+	cols, err := rsMap.Rows.Columns()
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func (rs *Rows) ScanSlice(dest interface{}) error {
 		}
 	}
 
-	err = rs.Rows.Scan(newDest...)
+	err = rsMap.Rows.Scan(newDest...)
 	if err != nil {
 		return err
 	}
@@ -112,28 +112,34 @@ func (rs *Rows) ScanSlice(dest interface{}) error {
 	return nil
 }
 
-type Row struct {
-	rows *Rows
+
+
+
+
+type RowMap struct {
+	RowsMap *RowsMap
 	// One of these two will be non-nil:
-	err error // deferred error for easy chaining
+	Err error // deferred error for easy chaining
 }
 
-func (row *Row) ScanStructByIndex(dest interface{}) error {
-	if row.err != nil {
-		return row.err
+func (rowMap *RowMap) ScanStructByIndex(dest interface{}) error {
+	if rowMap.Err != nil {
+		return rowMap.Err
 	}
-	defer row.rows.Close()
+	defer rowMap.RowsMap.Rows.Close()
 
-	if !row.rows.Next() {
-		if err := row.rows.Err(); err != nil {
+	if !rowMap.RowsMap.Rows.Next() {
+		if err := rowMap.RowsMap.Rows.Err(); err != nil {
 			return err
 		}
 		return sql.ErrNoRows
 	}
-	err := row.rows.ScanStructByIndex(dest)
+	err := rowMap.RowsMap.ScanStructByIndex(dest)
 	if err != nil {
 		return err
 	}
 	// Make sure the query can be processed to completion with no errors.
-	return row.rows.Close()
+	return rowMap.RowsMap.Rows.Close()
 }
+
+*/

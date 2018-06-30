@@ -2,10 +2,7 @@ package godb
 
 import (
 	_ "github.com/go-sql-driver/mysql"
-	"time"
 	"fmt"
-	"testing"
-	"reflect"
 )
 
 var(
@@ -37,21 +34,26 @@ type User struct {
 	Password string
 	Price    float32
 	Sex      int
-	CreateTime time.Time
+	CreateTime NullTime
 }
 
 func init()  {
 	fmt.Println("db_test init...")
 }
 
-func testopen() (*DB,error) {
+func testopen() (*DbUtils,error) {
 
-	db,err:=Open("mysql","root:123456@/testdb?charset=utf8&parseTime=true")
+	db,err:=Open("mysql","root:123456@/testdb?charset=utf8")
 	if err!=nil{
 		return nil,err
 	}
 	return db,nil
 }
+
+
+
+
+/*
 
 func Test_db(t *testing.T)  {
 	fmt.Println("test_db...")
@@ -60,61 +62,63 @@ func Test_db(t *testing.T)  {
 	if err!=nil{
 		t.Error(err)
 	}
-	err = db.Ping()
+	err = db.Db.Ping()
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close()
+	defer db.Db.Close()
 
-	_, err= db.Exec(createTableSql)
+	_, err= db.Db.Exec(createTableSql)
 	if err != nil {
 		t.Error(err)
 	}
-    /*
-	for i := 0; i < 100; i++ {
-		name:="cly"+strconv.Itoa(i)
-		_, err = db.Exec("insert into t_test (`username`, password, price, sex, createdTime) values (?,?,?,?,?)",
-			name, "123456", 1.2, 1, time.Now())
-		if err != nil {
-			t.Error(err)
-		}
-	}*/
 
-	rows,err := db.Query("select * from t_test")
-	for rows.Next()  {
-		var Id int
-		var Username ,Password string
-		var Price float32
-		var Sex int
-		var CreatedTime time.Time
-		err = rows.Scan(&Id,&Username,&Password,&Price,&Sex,&CreatedTime)
-		if err!=nil {
-			t.Error(err)
-		}
-		fmt.Println(Id,Username,Password,Price,Sex,CreatedTime)
-	}
+	   for i := 0; i < 100; i++ {
+		   name:="cly"+strconv.Itoa(i)
+		   _, err = db.Exec("insert into t_test (`username`, password, price, sex, createdTime) values (?,?,?,?,?)",
+			   name, "123456", 1.2, 1, &NullTime{time.Now(),true})
+		   if err != nil {
+			   t.Error(err)
+		   }
+	   }
+
+	  // rows,err := db.Db.Query("select * from t_test")
+	  rows,err :=db.Query("select * from t_test")
+	   for rows.Rows.Next()  {
+		   var Id int
+		   var Username ,Password string
+		   var Price float32
+		   var Sex int
+		   var CreatedTime NullTime
+		   err = rows.Rows.Scan(&Id,&Username,&Password,&Price,&Sex,&CreatedTime)
+		   if err!=nil {
+			   t.Error(err)
+		   }
+		   fmt.Println(Id,Username,Password,Price,Sex,CreatedTime)
+	   }
 
 }
+
 
 func Test_Query(t *testing.T)  {
 	db,err:=testopen()
 	if err!=nil{
 		t.Error(err)
 	}
-	err = db.Ping()
+	err = db.Db.Ping()
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close()
+	defer db.Db.Close()
 
 
-	rows,err := db.Query("select * from t_test limit 0,5")
+	rows,err := db.Db.Query("select * from t_test limit 0,5")
 	for rows.Next()  {
 		var Id int
 		var Username ,Password string
 		var Price float32
 		var Sex int
-		var CreatedTime time.Time
+		var CreatedTime NullTime
 		err = rows.Scan(&Id,&Username,&Password,&Price,&Sex,&CreatedTime)
 		if err!=nil {
 			t.Error(err)
@@ -131,14 +135,14 @@ func Test_ScanStructByIndex(t *testing.T)  {
 	if err!=nil{
 		t.Error(err)
 	}
-	err = db.Ping()
+	err = db.Db.Ping()
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close()
+	defer db.Db.Close()
 
 	rows,err := db.Query("select * from t_test limit 0,5")
-	for rows.Next() {
+	for rows.Rows.Next() {
 		var user User
 		err = rows.ScanStructByIndex(&user)
 		if err != nil {
@@ -147,7 +151,7 @@ func Test_ScanStructByIndex(t *testing.T)  {
 		fmt.Println(user)
 
 	}
-	rows.Close()
+	rows.Rows.Close()
 
 }
 
@@ -157,18 +161,18 @@ func Test_ScanMap(t *testing.T)  {
 	if err!=nil{
 		t.Error(err)
 	}
-	err = db.Ping()
+	err = db.Db.Ping()
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close()
+	defer db.Db.Close()
 
 	rows, err := db.Query("select * from t_test limit 0,10")
 	if err != nil {
 		t.Error(err)
 	}
 
-	for rows.Next() {
+	for rows.Rows.Next() {
 		m := make(map[string]interface{})
 		err = rows.ScanMap(&m)
 		if err != nil {
@@ -177,7 +181,7 @@ func Test_ScanMap(t *testing.T)  {
 		fmt.Println(m)
 	}
 
-	rows.Close()
+	rows.Rows.Close()
 }
 
 func Test_select(t *testing.T)  {
@@ -186,24 +190,24 @@ func Test_select(t *testing.T)  {
 	if err!=nil{
 		t.Error(err)
 	}
-	err = db.Ping()
+	err = db.Db.Ping()
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close()
+	defer db.Db.Close()
 
 	rows,err := db.Query("select * from t_test limit 0,10")
 
-	columns, _ := rows.Columns()
+	columns, _ := rows.Rows.Columns()
 	scanArgs := make([]interface{}, len(columns))
 	values := make([]interface{}, len(columns))
 	for i := range values {
 		scanArgs[i] = &values[i]
 	}
 
-	for rows.Next() {
+	for rows.Rows.Next() {
 		//将行数据保存到record字典
-		err = rows.Scan(scanArgs...)
+		err = rows.Rows.Scan(scanArgs...)
 		record := make(map[string]interface{})
 		for i, col := range values {
 			if col != nil {
@@ -223,18 +227,18 @@ func Test_ReflectMap(t *testing.T)  {
 	if err!=nil{
 		t.Error(err)
 	}
-	err = db.Ping()
+	err = db.Db.Ping()
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close()
+	defer db.Db.Close()
 
 	rows,err := db.Query("select * from t_test limit 0,10")
 
-	cols, _ := rows.Columns()
+	cols, _ := rows.Rows.Columns()
 	newDest := make([]interface{}, len(cols))
 
-	for rows.Next() {
+	for rows.Rows.Next() {
 		m := make(map[string]interface{})
 		vv := reflect.ValueOf(&m)
 		vvv := vv.Elem()
@@ -243,7 +247,7 @@ func Test_ReflectMap(t *testing.T)  {
 			value := reflect.MakeSlice(reflect.SliceOf(vvv.Type().Elem()), DefaultCacheSize, DefaultCacheSize)
 			newDest[i] = value.Index(i).Addr().Interface()
 		}
-		err = rows.Scan(newDest...)
+		err = rows.Rows.Scan(newDest...)
 		if err != nil {
 			t.Error(err)
 		}
@@ -265,21 +269,21 @@ func Test_ScanSlice(t *testing.T)  {
 	if err!=nil{
 		t.Error(err)
 	}
-	err = db.Ping()
+	err = db.Db.Ping()
 	if err != nil {
 		panic(err.Error())
 	}
-	defer db.Close()
+	defer db.Db.Close()
 
 	rows, err := db.Query("select * from t_test limit 0,10")
 	if err != nil {
 		t.Error(err)
 	}
 
-	cols, _ := rows.Columns()
+	cols, _ := rows.Rows.Columns()
 
 
-	for rows.Next() {
+	for rows.Rows.Next() {
 		slice := make([]interface{}, len(cols))
 		err = rows.ScanSlice(&slice)
 		if err != nil {
@@ -289,5 +293,8 @@ func Test_ScanSlice(t *testing.T)  {
 		fmt.Println(slice)
 	}
 
-	rows.Close()
+	rows.Rows.Close()
 }
+
+
+*/
