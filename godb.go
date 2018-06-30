@@ -7,6 +7,7 @@ import (
 	"time"
 	"database/sql/driver"
 	"regexp"
+	"fmt"
 )
 
 type SqlQueryRunner interface {
@@ -55,6 +56,8 @@ func maybeExpandNamedQuery(dbUtils *DbUtils, query string, args []interface{}) (
 		return query, args
 	}
 
+	fmt.Println(query)
+
 	return expandNamedQuery(dbUtils, query, argval.FieldByName)
 }
 
@@ -80,6 +83,14 @@ func expandNamedQuery(dbUtils *DbUtils, query string, keyGetter func(key string)
 }
 
 
+func extractExecutorAndContext(e SqlQueryRunner) (*sql.DB, context.Context) {
+	switch m := e.(type) {
+	case *DbUtils:
+		return m.Db, m.ctx
+	}
+	return nil, nil
+}
+
 func get(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{},
 	keys ...interface{}) (interface{}, error) {
     return nil,nil
@@ -95,5 +106,12 @@ func update(dbUtils *DbUtils, queryRunner SqlQueryRunner, list ...interface{}) (
 
 func insert(dbUtils *DbUtils, queryRunner SqlQueryRunner, list ...interface{}) error {
 	return nil
+}
+
+
+func query(queryRunner SqlQueryRunner, query string, args ...interface{}) (*sql.Rows, error) {
+	db, _ := extractExecutorAndContext(queryRunner)
+
+	return db.Query(query, args...)
 }
 

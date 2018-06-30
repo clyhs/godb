@@ -117,7 +117,7 @@ func (dbUtils *DbUtils) QueryRow(query string, args ...interface{}) *sql.Row {
 
 func (dbUtils *DbUtils) Query(q string, args ...interface{}) (*sql.Rows, error) {
 
-	return nil, nil
+	return query(dbUtils, q, args...)
 }
 
 
