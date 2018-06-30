@@ -82,14 +82,16 @@ func expandNamedQuery(dbUtils *DbUtils, query string, keyGetter func(key string)
 	}), args
 }
 
-
-func extractExecutorAndContext(e SqlQueryRunner) (*sql.DB, context.Context) {
+/*
+func extractExecutorAndContext(e SqlQueryRunner) (reflect.Value, context.Context) {
 	switch m := e.(type) {
 	case *DbUtils:
-		return m.Db, m.ctx
+		return reflect.ValueOf(m.Db), m.ctx
+	case *Transaction:
+		return reflect.ValueOf(m.tx), m.ctx
 	}
-	return nil, nil
-}
+	return reflect.ValueOf(nil), nil
+}*/
 
 func get(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{},
 	keys ...interface{}) (interface{}, error) {
@@ -110,8 +112,12 @@ func insert(dbUtils *DbUtils, queryRunner SqlQueryRunner, list ...interface{}) e
 
 
 func query(queryRunner SqlQueryRunner, query string, args ...interface{}) (*sql.Rows, error) {
-	db, _ := extractExecutorAndContext(queryRunner)
-
-	return db.Query(query, args...)
+	switch m := queryRunner.(type) {
+	case *DbUtils:
+		return m.Db.Query(query,args...)
+	case *Transaction:
+		return m.tx.Query(query,args...)
+	}
+	return nil, nil
 }
 

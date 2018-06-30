@@ -36,3 +36,12 @@ func selectInt(dbUtils *DbUtils, query string, args ...interface{}) int64 {
 	}
 	return i64
 }
+
+func selectNullInt(dbUtils *DbUtils, query string, args ...interface{}) sql.NullInt64 {
+	i64, err := SelectNullInt(dbUtils, query, args...)
+	if err != nil {
+		panic(err)
+	}
+
+	return i64
+}
