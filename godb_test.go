@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"testing"
 	"fmt"
+	"reflect"
 )
 
 func initDB() *DbUtils {
@@ -25,6 +26,13 @@ func TestDbUtils_SelectInt(t *testing.T) {
 	i64 := selectInt(dbUtils, "select id from t_test where username='cly0'")
 
 	fmt.Println(i64)
+
+	n := selectNullInt(dbUtils, "select id from t_test where username='notfound'")
+	if !reflect.DeepEqual(n, sql.NullInt64{0, false}) {
+		t.Errorf("nullint %v != 0,false", n)
+	}
+
+	fmt.Println(n)
 
 }
 

@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9da63616-958f-4ad2-af4e-e1bd9d8f4fd6" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/godb.go" beforeDir="false" afterPath="$PROJECT_DIR$/godb.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/godb_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/godb_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/select.go" beforeDir="false" afterPath="$PROJECT_DIR$/select.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -42,11 +40,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="godb_test.go" pinned="false" current-in-tab="false">
+      <file leaf-file-name="godb_test.go" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/godb_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="243">
-              <caret line="39" selection-start-line="39" selection-end-line="47" />
+            <state relative-caret-position="315">
+              <caret line="35" column="4" selection-start-line="35" selection-start-column="4" selection-end-line="35" selection-end-column="4" />
               <folding>
                 <element signature="e#14#37#0" expanded="true" />
               </folding>
@@ -54,11 +52,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="select.go" pinned="false" current-in-tab="true">
+      <file leaf-file-name="select.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/select.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="363">
-              <caret line="88" column="1" lean-forward="true" selection-start-line="88" selection-start-column="1" selection-end-line="88" selection-end-column="1" />
+            <state relative-caret-position="309">
+              <caret line="82" column="42" lean-forward="true" selection-start-line="82" selection-start-column="42" selection-end-line="82" selection-end-column="42" />
               <folding>
                 <element signature="e#14#47#0" expanded="true" />
               </folding>
@@ -158,8 +156,8 @@
         <option value="$PROJECT_DIR$/dialect_mysql.go" />
         <option value="$PROJECT_DIR$/db.go" />
         <option value="$PROJECT_DIR$/godb.go" />
-        <option value="$PROJECT_DIR$/godb_test.go" />
         <option value="$PROJECT_DIR$/select.go" />
+        <option value="$PROJECT_DIR$/godb_test.go" />
       </list>
     </option>
   </component>
@@ -745,22 +743,22 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/godb_test.go">
+    <entry file="file://$PROJECT_DIR$/select.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="243">
-          <caret line="39" selection-start-line="39" selection-end-line="47" />
+        <state relative-caret-position="309">
+          <caret line="82" column="42" lean-forward="true" selection-start-line="82" selection-start-column="42" selection-end-line="82" selection-end-column="42" />
           <folding>
-            <element signature="e#14#37#0" expanded="true" />
+            <element signature="e#14#47#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/select.go">
+    <entry file="file://$PROJECT_DIR$/godb_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="363">
-          <caret line="88" column="1" lean-forward="true" selection-start-line="88" selection-start-column="1" selection-end-line="88" selection-end-column="1" />
+        <state relative-caret-position="315">
+          <caret line="35" column="4" selection-start-line="35" selection-start-column="4" selection-end-line="35" selection-end-column="4" />
           <folding>
-            <element signature="e#14#47#0" expanded="true" />
+            <element signature="e#14#37#0" expanded="true" />
           </folding>
         </state>
       </provider>
