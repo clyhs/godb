@@ -56,15 +56,20 @@ type NameOnly struct {
 
 func TestDbUtils_SelectOne2(t *testing.T) {
 	dbUtils:=initDB()
-	var u []NameOnly
-	//params :=map[string]interface{}{"id":401}
-	err:=dbUtils.SelectOne(&u,"select username from t_test")
+	var u NameOnly
+	params :=map[string]interface{}{"id":401}
+	err:=dbUtils.SelectOne(&u,"select username from t_test where id=:id",params)
 	if err!=nil{
 		panic(err)
 	}
 	//{401 cly0 123456 1.2 1 {2018-06-13 14:58:50 +0000 UTC true}}
 	fmt.Println(u)
 }
+
+func TestDbUtils_SelectOne3(t *testing.T) {
+
+}
+
 
 
 func selectInt(dbUtils *DbUtils, query string, args ...interface{}) int64 {
