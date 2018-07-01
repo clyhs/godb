@@ -58,3 +58,39 @@ func MapToSlice(query string, mp interface{}) (string, []interface{}, error) {
 
 	return query, args, err
 }
+
+
+func toSliceType(i interface{}) (reflect.Type, error) {
+	t := reflect.TypeOf(i)
+
+
+	if t.Kind() != reflect.Ptr {
+		// If it's a slice, return a more helpful error message
+		if t.Kind() == reflect.Slice {
+			return nil, fmt.Errorf("godb: cannot SELECT into a non-pointer slice: %v", t)
+		}
+
+		return nil, nil
+	}else {
+		fmt.Println(t.Kind())
+	}
+	fmt.Println(t.Elem())
+	if t = t.Elem(); t.Kind() != reflect.Slice {
+		return nil, nil
+	}
+	return t.Elem(), nil
+}
+
+func toType(i interface{}) (reflect.Type, error) {
+	t := reflect.TypeOf(i)
+
+	// If a Pointer to a type, follow
+	for t.Kind() == reflect.Ptr {
+		t = t.Elem()
+	}
+
+	if t.Kind() != reflect.Struct {
+		return nil, fmt.Errorf("godb: cannot SELECT into this type: %v", reflect.TypeOf(i))
+	}
+	return t, nil
+}

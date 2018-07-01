@@ -8,6 +8,7 @@ import (
 	"database/sql/driver"
 	"regexp"
 	"fmt"
+	"strings"
 )
 
 type SqlQueryRunner interface {
@@ -92,6 +93,45 @@ func extractExecutorAndContext(e SqlQueryRunner) (reflect.Value, context.Context
 	}
 	return reflect.ValueOf(nil), nil
 }*/
+
+func columnToFieldIndex(m *DbUtils, t reflect.Type, cols []string) ([][]int, error) {
+
+	colToFieldIndex := make([][]int, len(cols))
+
+	missingColNames := []string{}
+
+	for x := range cols {
+		colName := strings.ToLower(cols[x])
+		field, found := t.FieldByNameFunc(func(fieldName string) bool {
+
+			field, _ := t.FieldByName(fieldName)
+			fmt.Println(fieldName)
+			cArguments := strings.Split(field.Tag.Get("db"), ",")
+			fieldName = cArguments[0]
+
+			if fieldName == "-" {
+				return false
+			} else if fieldName == "" {
+				fieldName = field.Name
+			}
+			return colName == strings.ToLower(fieldName)
+		})
+		if found {
+			colToFieldIndex[x] = field.Index
+		}
+		if colToFieldIndex[x] == nil {
+			missingColNames = append(missingColNames, colName)
+		}
+	}
+	if len(missingColNames) > 0 {
+		fmt.Println(missingColNames)
+		return colToFieldIndex, &NoFieldInTypeError{
+			TypeName:        t.Name(),
+			MissingColNames: missingColNames,
+		}
+	}
+	return colToFieldIndex, nil
+}
 
 func get(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{},
 	keys ...interface{}) (interface{}, error) {

@@ -107,7 +107,7 @@ func (dbUtils *DbUtils) SelectNullStr(query string, args ...interface{}) (sql.Nu
 
 // SelectOne is a convenience wrapper around the gorp.SelectOne function
 func (dbUtils *DbUtils) SelectOne(holder interface{}, query string, args ...interface{}) error {
-	return nil
+	return SelectOne(dbUtils,dbUtils,holder,query,args...)
 }
 
 func (dbUtils *DbUtils) QueryRow(query string, args ...interface{}) *sql.Row {

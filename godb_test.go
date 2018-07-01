@@ -36,6 +36,36 @@ func TestDbUtils_SelectInt(t *testing.T) {
 
 }
 
+func TestDbUtils_SelectOne(t *testing.T) {
+	dbUtils:=initDB()
+	var u User
+	params :=map[string]interface{}{"id":401}
+	err:=dbUtils.SelectOne(&u,"select * from t_test where id=:id",params)
+	if err!=nil{
+		panic(err)
+	}
+    //{401 cly0 123456 1.2 1 {2018-06-13 14:58:50 +0000 UTC true}}
+	fmt.Println(u)
+
+
+}
+
+type NameOnly struct {
+	Username string
+}
+
+func TestDbUtils_SelectOne2(t *testing.T) {
+	dbUtils:=initDB()
+	var u []NameOnly
+	//params :=map[string]interface{}{"id":401}
+	err:=dbUtils.SelectOne(&u,"select username from t_test")
+	if err!=nil{
+		panic(err)
+	}
+	//{401 cly0 123456 1.2 1 {2018-06-13 14:58:50 +0000 UTC true}}
+	fmt.Println(u)
+}
+
 
 func selectInt(dbUtils *DbUtils, query string, args ...interface{}) int64 {
 	i64, err := SelectInt(dbUtils, query, args...)
@@ -53,3 +83,5 @@ func selectNullInt(dbUtils *DbUtils, query string, args ...interface{}) sql.Null
 
 	return i64
 }
+
+

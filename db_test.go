@@ -34,7 +34,7 @@ type User struct {
 	Password string
 	Price    float32
 	Sex      int
-	CreateTime NullTime
+	CreatedTime NullTime
 }
 
 func init()  {
