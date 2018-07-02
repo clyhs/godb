@@ -3,6 +3,11 @@ package godb
 import (
 	"database/sql"
 	"context"
+	"reflect"
+	"strings"
+	"fmt"
+	"strconv"
+	"database/sql/driver"
 )
 var (
 	DefaultCacheSize = 200
@@ -37,14 +42,12 @@ func Open(driverName string,dataSourceName string)(*DbUtils,error)  {
 
 }
 
-
 func (dbUtils *DbUtils) WithContext(ctx context.Context) SqlQueryRunner {
 	copy := &DbUtils{}
 	*copy = *dbUtils
 	copy.ctx = ctx
 	return copy
 }
-
 
 func (dbUtils *DbUtils) Get(i interface{}, keys ...interface{}) (interface{}, error) {
 	return get(dbUtils, dbUtils, i, keys...)
@@ -64,7 +67,7 @@ func (dbUtils *DbUtils) Delete(list ...interface{}) (int64, error) {
 
 
 func (dbUtils *DbUtils) Select(i interface{}, query string, args ...interface{}) ([]interface{}, error) {
-	return nil, nil
+	return selectlist(dbUtils,dbUtils,i,query,args...)
 }
 
 // Exec runs an arbitrary SQL statement.  args represent the bind parameters.
@@ -112,14 +115,168 @@ func (dbUtils *DbUtils) SelectOne(holder interface{}, query string, args ...inte
 
 func (dbUtils *DbUtils) QueryRow(query string, args ...interface{}) *sql.Row {
 
+
 	return nil
 }
 
 func (dbUtils *DbUtils) Query(q string, args ...interface{}) (*sql.Rows, error) {
-
 	return query(dbUtils, q, args...)
 }
 
+func (dbUtils *DbUtils) AddTable(i interface{}) *TableMap {
+	return dbUtils.AddTableWithName(i, "")
+}
+
+func (dbUtils *DbUtils) AddTableWithName(i interface{}, name string) *TableMap {
+	return dbUtils.AddTableWithNameAndSchema(i, "", name)
+}
+
+func (dbUtils *DbUtils) AddTableWithNameAndSchema(i interface{}, schema string, name string) *TableMap {
+	t := reflect.TypeOf(i)
+	if name == "" {
+		name = t.Name()
+	}
+
+	// check if we have a table for this type already
+	// if so, update the name and return the existing pointer
+	for i := range dbUtils.tables {
+		table := dbUtils.tables[i]
+		if table.gotype == t {
+			table.TableName = name
+			return table
+		}
+	}
+
+	tmap := &TableMap{gotype: t, TableName: name, SchemaName: schema, dbUtils: dbUtils}
+	var primaryKey []*ColumnMap
+
+	tmap.Columns, primaryKey = dbUtils.readStructColumns(t)
+	dbUtils.tables = append(dbUtils.tables, tmap)
+	if len(primaryKey) > 0 {
+		tmap.keys = append(tmap.keys, primaryKey...)
+	}
+
+	return tmap
+}
+
+func (dbUtils *DbUtils) readStructColumns(t reflect.Type) (cols []*ColumnMap, primaryKey []*ColumnMap) {
+
+	primaryKey = make([]*ColumnMap, 0)
+
+	n := t.NumField()
+	for i := 0; i < n; i++ {
+		f := t.Field(i)
+		if f.Anonymous && f.Type.Kind() == reflect.Struct {
+
+			subcols, subpk := dbUtils.readStructColumns(f.Type)
+			// Don't append nested fields that have the same field
+			// name as an already-mapped field.
+			for _, subcol := range subcols {
+				shouldAppend := true
+				for _, col := range cols {
+					if !subcol.Transient && subcol.fieldName == col.fieldName {
+						shouldAppend = false
+						break
+					}
+				}
+				if shouldAppend {
+					cols = append(cols, subcol)
+				}
+			}
+			if subpk != nil {
+				primaryKey = append(primaryKey, subpk...)
+			}
+		}else{
+			cArguments := strings.Split(f.Tag.Get("db"), ",")
+			columnName := cArguments[0]
+			var maxSize int
+			var defaultValue string
+			var isAuto bool
+			var isPK bool
+			var isNotNull bool
+			for _, argString := range cArguments[1:] {
+				argString = strings.TrimSpace(argString)
+				arg := strings.SplitN(argString, ":", 2)
+
+				// check mandatory/unexpected option values
+				switch arg[0] {
+				case "size", "default":
+					// options requiring value
+					if len(arg) == 1 {
+						panic(fmt.Sprintf("missing option value for option %v on field %v", arg[0], f.Name))
+					}
+				default:
+					// options where value is invalid (currently all other options)
+					if len(arg) == 2 {
+						panic(fmt.Sprintf("unexpected option value for option %v on field %v", arg[0], f.Name))
+					}
+				}
+
+				switch arg[0] {
+				case "size":
+					maxSize, _ = strconv.Atoi(arg[1])
+				case "default":
+					defaultValue = arg[1]
+				case "primarykey":
+					isPK = true
+				case "autoincrement":
+					isAuto = true
+				case "notnull":
+					isNotNull = true
+				default:
+					panic(fmt.Sprintf("Unrecognized tag option for field %v: %v", f.Name, arg))
+				}
+			}
+			if columnName == "" {
+				columnName = f.Name
+			}
+
+			gotype := f.Type
+			valueType := gotype
+			if valueType.Kind() == reflect.Ptr {
+				valueType = valueType.Elem()
+			}
+			value := reflect.New(valueType).Interface()
+			if typer, ok := value.(SqlTyper); ok {
+				gotype = reflect.TypeOf(typer.SqlType())
+			}else if valuer, ok := value.(driver.Valuer); ok {
+				// Only check for driver.Valuer if SqlTyper wasn't
+				// found.
+				v, err := valuer.Value()
+				if err == nil && v != nil {
+					gotype = reflect.TypeOf(v)
+				}
+			}
+			cm := &ColumnMap{
+				ColumnName:   columnName,
+				DefaultValue: defaultValue,
+				Transient:    columnName == "-",
+				fieldName:    f.Name,
+				gotype:       gotype,
+				isPK:         isPK,
+				isAutoIncr:   isAuto,
+				isNotNull:    isNotNull,
+				MaxSize:      maxSize,
+			}
+			if isPK {
+				primaryKey = append(primaryKey, cm)
+			}
+			shouldAppend := true
+			for index, col := range cols {
+				if !col.Transient && col.fieldName == cm.fieldName {
+					cols[index] = cm
+					shouldAppend = false
+					break
+				}
+			}
+			if shouldAppend {
+				cols = append(cols, cm)
+			}
+
+		}
+	}
+	return
+}
 
 /*
 func (dbUtils *DbUtils) reflectNew(typ reflect.Type) reflect.Value {

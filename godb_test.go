@@ -66,8 +66,17 @@ func TestDbUtils_SelectOne2(t *testing.T) {
 	fmt.Println(u)
 }
 
-func TestDbUtils_SelectOne3(t *testing.T) {
+func TestDbUtils_selectlist(t *testing.T) {
 
+	dbUtils:=initDB()
+	var u []NameOnly
+	//params :=map[string]interface{}{"id":401}
+	list, err:=dbUtils.Select(&u,"select username from t_test ")
+	if err!=nil{
+		panic(err)
+	}
+	//{401 cly0 123456 1.2 1 {2018-06-13 14:58:50 +0000 UTC true}}
+	fmt.Println(list)
 }
 
 

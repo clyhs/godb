@@ -257,3 +257,20 @@ func rawselect(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{}, quer
 
 	return list, nonFatalErr
 }
+
+func selectlist(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{}, query string,
+	args ...interface{}) ([]interface{}, error) {
+
+	var nonFatalErr error
+
+	list, err := rawselect(dbUtils, queryRunner, i, query, args...)
+	if err != nil {
+		if !NonFatalError(err) {
+			return nil, err
+		}
+		nonFatalErr = err
+	}
+
+
+	return list, nonFatalErr
+}

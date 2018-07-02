@@ -30,6 +30,9 @@ type SqlQueryRunner interface {
 	QueryRow(query string, args ...interface{}) *sql.Row
 }
 
+type SqlTyper interface {
+	SqlType() driver.Value
+}
 
 func maybeExpandNamedQuery(dbUtils *DbUtils, query string, args []interface{}) (string, []interface{}) {
 	var (
