@@ -313,6 +313,69 @@ func (dbUtils *DbUtils) createTables(ifNotExists bool) error {
 	return err
 }
 
+func (dbUtils *DbUtils) DropTables() error {
+	return dbUtils.dropTables(false)
+}
+
+// DropTablesIfExists is the same as DropTables, but uses the "if exists" clause to
+// avoid errors for tables that do not exist.
+func (dbUtils *DbUtils) DropTablesIfExists() error {
+	return dbUtils.dropTables(true)
+}
+
+// Goes through all the registered tables, dropping them one by one.
+// If an error is encountered, then it is returned and the rest of
+// the tables are not dropped.
+func (dbUtils *DbUtils) dropTables(addIfExists bool) (err error) {
+	for _, table := range dbUtils.tables {
+		err = dbUtils.dropTableImpl(table, addIfExists)
+		if err != nil {
+			return err
+		}
+	}
+
+	return err
+}
+
+// Implementation of dropping a single table.
+func (dbUtils *DbUtils) dropTable(t reflect.Type, name string, addIfExists bool) error {
+	table := tableOrNil(dbUtils, t, name)
+	if table == nil {
+		return fmt.Errorf("table %s was not registered", table.TableName)
+	}
+
+	return dbUtils.dropTableImpl(table, addIfExists)
+}
+
+func (dbUtils *DbUtils) dropTableImpl(table *TableMap, ifExists bool) (err error) {
+	tableDrop := "drop table"
+	if ifExists {
+		tableDrop = dbUtils.Dialect.IfTableExists(tableDrop, table.SchemaName, table.TableName)
+	}
+	_, err = dbUtils.Exec(fmt.Sprintf("%s %s;", tableDrop, dbUtils.Dialect.QuotedTableForQuery(table.SchemaName, table.TableName)))
+	return err
+}
+func tableOrNil(dbUtils *DbUtils, t reflect.Type, name string) *TableMap {
+
+	if name!=""{
+		for i := range dbUtils.tables {
+			table := dbUtils.tables[i]
+			if table.TableName == name {
+				return table
+			}
+		}
+	}
+
+	for i := range dbUtils.tables {
+		table := dbUtils.tables[i]
+		if table.gotype == t {
+			return table
+		}
+	}
+	return nil
+}
+
+
 /*
 func (dbUtils *DbUtils) reflectNew(typ reflect.Type) reflect.Value {
 	dbUtils.reflectCacheMutex.Lock()
