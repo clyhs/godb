@@ -29,6 +29,7 @@ type DbUtils struct {
 	Db            *sql.DB
 	tables        []*TableMap
 	Dialect       Dialect
+	TypeConverter TypeConverter
 }
 
 
@@ -74,7 +75,7 @@ func (dbUtils *DbUtils) Select(i interface{}, query string, args ...interface{})
 // This is equivalent to running:  Exec() using database/sql
 func (dbUtils *DbUtils) Exec(query string, args ...interface{}) (sql.Result, error) {
 
-	return nil,nil
+	return maybeExpandNamedQueryAndExec(dbUtils,query,args...)
 
 }
 
@@ -237,6 +238,17 @@ func (dbUtils *DbUtils) readStructColumns(t reflect.Type) (cols []*ColumnMap, pr
 				valueType = valueType.Elem()
 			}
 			value := reflect.New(valueType).Interface()
+			if dbUtils.TypeConverter != nil {
+				// Make a new pointer to a value of type gotype and
+				// pass it to the TypeConverter's FromDb method to see
+				// if a different type should be used for the column
+				// type during table creation.
+				scanner, useHolder := dbUtils.TypeConverter.FromDb(value)
+				if useHolder {
+					value = scanner.Holder
+					gotype = reflect.TypeOf(value)
+				}
+			}
 			if typer, ok := value.(SqlTyper); ok {
 				gotype = reflect.TypeOf(typer.SqlType())
 			}else if valuer, ok := value.(driver.Valuer); ok {
@@ -276,6 +288,29 @@ func (dbUtils *DbUtils) readStructColumns(t reflect.Type) (cols []*ColumnMap, pr
 		}
 	}
 	return
+}
+
+
+
+func (dbUtils *DbUtils) CreateTables() error {
+	return dbUtils.createTables(false)
+}
+
+func (dbUtils *DbUtils) CreateTablesIfNotExists() error {
+	return dbUtils.createTables(true)
+}
+
+func (dbUtils *DbUtils) createTables(ifNotExists bool) error {
+	var err error
+	for i := range dbUtils.tables {
+		table := dbUtils.tables[i]
+		sql := table.CreateTableSql(ifNotExists)
+		_, err = dbUtils.Exec(sql)
+		if err != nil {
+			return err
+		}
+	}
+	return err
 }
 
 /*

@@ -178,3 +178,22 @@ func (t *TableMap) CreateTableSql(ifNotExists bool) string {
 	s.WriteString(dialect.QuerySuffix())
 	return s.String()
 }
+
+
+type CustomScanner struct {
+	// After a row is scanned, Holder will contain the value from the database column.
+	// Initialize the CustomScanner with the concrete Go type you wish the database
+	// driver to scan the raw column into.
+	Holder interface{}
+	// Target typically holds a pointer to the target struct field to bind the Holder
+	// value to.
+	Target interface{}
+	// Binder is a custom function that converts the holder value to the target type
+	// and sets target accordingly.  This function should return error if a problem
+	// occurs converting the holder to the target.
+	Binder func(holder interface{}, target interface{}) error
+}
+
+func (me CustomScanner) Bind() error {
+	return me.Binder(me.Holder, me.Target)
+}

@@ -11,6 +11,20 @@ import (
 	"strings"
 )
 
+type TypeConverter interface {
+	// ToDb converts val to another type. Called before INSERT/UPDATE operations
+	ToDb(val interface{}) (interface{}, error)
+
+	// FromDb returns a CustomScanner appropriate for this type. This will be used
+	// to hold values returned from SELECT queries.
+	//
+	// In particular the CustomScanner returned should implement a Binder
+	// function appropriate for the Go type you wish to convert the db value to
+	//
+	// If bool==false, then no custom scanner will be used for this field.
+	FromDb(target interface{}) (CustomScanner, bool)
+}
+
 type SqlQueryRunner interface {
 	WithContext(ctx context.Context) SqlQueryRunner
 	Get(i interface{}, keys ...interface{}) (interface{}, error)
@@ -86,6 +100,26 @@ func expandNamedQuery(dbUtils *DbUtils, query string, keyGetter func(key string)
 	}), args
 }
 
+func maybeExpandNamedQueryAndExec(queryRunner SqlQueryRunner, query string, args ...interface{}) (sql.Result, error) {
+
+	dbUtils:=extractDbUtils(queryRunner)
+	if len(args) == 1 {
+		query, args = maybeExpandNamedQuery(dbUtils, query, args)
+	}
+	//return exec(queryRunner, query, args...)
+	return dbUtils.Db.Exec(query,args...)
+}
+
+func extractDbUtils(queryRunner SqlQueryRunner) *DbUtils {
+	switch db := queryRunner.(type) {
+	case *DbUtils:
+		return db
+	case *Transaction:
+		return db.dbUtils
+	}
+	return nil
+}
+
 /*
 func extractExecutorAndContext(e SqlQueryRunner) (reflect.Value, context.Context) {
 	switch m := e.(type) {
@@ -136,6 +170,8 @@ func columnToFieldIndex(m *DbUtils, t reflect.Type, cols []string) ([][]int, err
 	return colToFieldIndex, nil
 }
 
+
+
 func get(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{},
 	keys ...interface{}) (interface{}, error) {
     return nil,nil
@@ -163,4 +199,6 @@ func query(queryRunner SqlQueryRunner, query string, args ...interface{}) (*sql.
 	}
 	return nil, nil
 }
+
+
 
