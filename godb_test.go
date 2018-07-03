@@ -98,4 +98,8 @@ func selectNullInt(dbUtils *DbUtils, query string, args ...interface{}) sql.Null
 	return i64
 }
 
+func _insert(dbUtils *DbUtils, list ...interface{}) {
+
+}
+
 

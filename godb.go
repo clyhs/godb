@@ -186,6 +186,15 @@ func update(dbUtils *DbUtils, queryRunner SqlQueryRunner, list ...interface{}) (
 }
 
 func insert(dbUtils *DbUtils, queryRunner SqlQueryRunner, list ...interface{}) error {
+
+	for _, ptr := range list {
+
+		table, elem, err := dbUtils.tableForPointer(ptr, false)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
 

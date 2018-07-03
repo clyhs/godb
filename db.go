@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"strconv"
 	"database/sql/driver"
+	"errors"
 )
 var (
 	DefaultCacheSize = 200
@@ -373,6 +374,42 @@ func tableOrNil(dbUtils *DbUtils, t reflect.Type, name string) *TableMap {
 		}
 	}
 	return nil
+}
+
+func (dbUtils *DbUtils) TableFor(t reflect.Type, checkPK bool) (*TableMap, error) {
+	table := tableOrNil(dbUtils, t, "")
+	if table == nil {
+		return nil, fmt.Errorf("no table found for type: %v", t.Name())
+	}
+
+	if checkPK && len(table.keys) < 1 {
+		e := fmt.Sprintf("godb: no keys defined for table: %s",
+			table.TableName)
+		return nil, errors.New(e)
+	}
+
+	return table, nil
+}
+
+func (dbUtils *DbUtils) tableForPointer(ptr interface{}, checkPK bool) (*TableMap, reflect.Value, error) {
+
+	ptrv := reflect.ValueOf(ptr)
+	if ptrv.Kind() != reflect.Ptr {
+		e := fmt.Sprintf("gorp: passed non-pointer: %v (kind=%v)", ptr,
+			ptrv.Kind())
+		return nil, reflect.Value{}, errors.New(e)
+	}
+	elem := ptrv.Elem()
+	ifc := elem.Interface()
+	var t *TableMap
+	var err error
+	etype := reflect.TypeOf(ifc)
+	t, err = dbUtils.TableFor(etype, checkPK)
+	if err != nil {
+		return nil, reflect.Value{}, err
+	}
+
+	return t, elem, nil
 }
 
 
