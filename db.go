@@ -56,6 +56,7 @@ func (dbUtils *DbUtils) Get(i interface{}, keys ...interface{}) (interface{}, er
 }
 
 func (dbUtils *DbUtils) Insert(list ...interface{}) error {
+
 	return insert(dbUtils, dbUtils, list...)
 }
 
@@ -394,8 +395,11 @@ func (dbUtils *DbUtils) TableFor(t reflect.Type, checkPK bool) (*TableMap, error
 func (dbUtils *DbUtils) tableForPointer(ptr interface{}, checkPK bool) (*TableMap, reflect.Value, error) {
 
 	ptrv := reflect.ValueOf(ptr)
+
+	fmt.Println(ptrv.Kind())
+
 	if ptrv.Kind() != reflect.Ptr {
-		e := fmt.Sprintf("gorp: passed non-pointer: %v (kind=%v)", ptr,
+		e := fmt.Sprintf("godb: passed non-pointer: %v (kind=%v)", ptr,
 			ptrv.Kind())
 		return nil, reflect.Value{}, errors.New(e)
 	}

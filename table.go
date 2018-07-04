@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"bytes"
 	"strings"
+	"sync"
 )
 
 type TableMap struct {
@@ -196,4 +197,123 @@ type CustomScanner struct {
 
 func (me CustomScanner) Bind() error {
 	return me.Binder(me.Holder, me.Target)
+}
+
+type bindPlan struct {
+	query             string
+	argFields         []string
+	keyFields         []string
+	versField         string
+	autoIncrIdx       int
+	autoIncrFieldName string
+	once              sync.Once
+}
+
+func (plan *bindPlan) createBindInstance(elem reflect.Value, conv TypeConverter) (bindInstance, error) {
+	bi := bindInstance{query: plan.query, autoIncrIdx: plan.autoIncrIdx, autoIncrFieldName: plan.autoIncrFieldName, versField: plan.versField}
+	if plan.versField != "" {
+		bi.existingVersion = elem.FieldByName(plan.versField).Int()
+	}
+
+	var err error
+
+	for i := 0; i < len(plan.argFields); i++ {
+		k := plan.argFields[i]
+		if k == "" {
+
+		} else {
+			val := elem.FieldByName(k).Interface()
+			if conv != nil {
+				val, err = conv.ToDb(val)
+				if err != nil {
+					return bindInstance{}, err
+				}
+			}
+			bi.args = append(bi.args, val)
+		}
+	}
+
+	for i := 0; i < len(plan.keyFields); i++ {
+		k := plan.keyFields[i]
+		val := elem.FieldByName(k).Interface()
+		if conv != nil {
+			val, err = conv.ToDb(val)
+			if err != nil {
+				return bindInstance{}, err
+			}
+		}
+		bi.keys = append(bi.keys, val)
+	}
+
+	return bi, nil
+}
+
+type bindInstance struct {
+	query             string
+	args              []interface{}
+	keys              []interface{}
+	existingVersion   int64
+	versField         string
+	autoIncrIdx       int
+	autoIncrFieldName string
+}
+
+func (t *TableMap)insert(elem reflect.Value) (bindInstance, error)  {
+
+	plan :=&bindPlan{}
+	plan.once.Do(func() {
+		plan.autoIncrIdx = -1
+
+		s := bytes.Buffer{}
+		s2 := bytes.Buffer{}
+		s.WriteString(fmt.Sprintf("insert into %s (", t.dbUtils.Dialect.QuotedTableForQuery(t.SchemaName, t.TableName)))
+
+		x := 0
+		first := true
+		for y := range t.Columns {
+			col := t.Columns[y]
+			if !(col.isAutoIncr && t.dbUtils.Dialect.AutoIncrBindValue() == "") {
+				if !col.Transient {
+					if !first {
+						s.WriteString(",")
+						s2.WriteString(",")
+					}
+					s.WriteString(t.dbUtils.Dialect.QuoteField(col.ColumnName))
+
+					if col.isAutoIncr {
+						s2.WriteString(t.dbUtils.Dialect.AutoIncrBindValue())
+						plan.autoIncrIdx = y
+						plan.autoIncrFieldName = col.fieldName
+					} else {
+						if col.DefaultValue == "" {
+							s2.WriteString(t.dbUtils.Dialect.BindVar(x))
+
+							plan.argFields = append(plan.argFields, col.fieldName)
+
+							x++
+						} else {
+							s2.WriteString(col.DefaultValue)
+						}
+					}
+					first = false
+				}
+			} else {
+				plan.autoIncrIdx = y
+				plan.autoIncrFieldName = col.fieldName
+			}
+		}
+		s.WriteString(") values (")
+		s.WriteString(s2.String())
+		s.WriteString(")")
+		if plan.autoIncrIdx > -1 {
+			s.WriteString(t.dbUtils.Dialect.AutoIncrInsertSuffix(t.Columns[plan.autoIncrIdx]))
+		}
+		s.WriteString(t.dbUtils.Dialect.QuerySuffix())
+
+		plan.query = s.String()
+	})
+
+	fmt.Println(plan)
+
+	return plan.createBindInstance(elem, t.dbUtils.TypeConverter)
 }

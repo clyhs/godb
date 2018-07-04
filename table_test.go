@@ -203,6 +203,44 @@ func TestTableMap_Create(t *testing.T)  {
 	if err!=nil{
 		panic(err)
 	}
+}
 
+func createTable() *DbUtils  {
+	dbUtils:=initDB()
+	dbUtils.AddTableWithName(Student{},"t_student").SetKeys(true, "Id")
+	dbUtils.AddTableWithName(StudentTag{},"t_student_tag")
+	dbUtils.AddTableWithName(StudentTransientTag{},"t_student_ts_tag").SetKeys(true, "s_id")
+	dbUtils.AddTableWithName(OverStudent{}, "t_student_over").SetKeys(false, "Id")
+	dbUtils.AddTableWithName(IdCreated{}, "t_id_created").SetKeys(true, "Id")
+	dbUtils.AddTableWithName(TypeConversionExample{}, "t_type_conv").SetKeys(true, "Id")
 
+	dbUtils.AddTableWithName(Person{}, "t_person").SetKeys(true, "Id").AddIndex("PersonIndex", "Btree", []string{"Name"}).SetUnique(true)
+
+	dbUtils.AddTableWithName(WithTime{}, "t_time_test").SetKeys(true, "Id")
+	dbUtils.AddTableWithName(WithNullTime{}, "t_nulltime_test").SetKeys(false, "Id")
+
+	dbUtils.TypeConverter = testTypeConverter{}
+	err:=dbUtils.CreateTablesIfNotExists()
+
+	if err!=nil{
+		panic(err)
+	}
+	return dbUtils
+}
+
+func TestDbUtils_Insert(t *testing.T) {
+	dbUtils:=createTable()
+
+	p := &Student{Name:"cly",IsGood:true}
+
+	err:=_insert(dbUtils,p)
+	if err!=nil {
+		panic(err)
+	}
+
+}
+
+func _insert(dbUtils *DbUtils, list ...interface{}) error {
+	err:=dbUtils.Insert(list...)
+	return err
 }

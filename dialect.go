@@ -56,4 +56,37 @@ type Dialect interface {
 	IfSchemaNotExists(command, schema string) string
 	IfTableExists(command, schema, table string) string
 	IfTableNotExists(command, schema, table string) string
-} 
+}
+
+type IntegerAutoIncrInserter interface {
+	InsertAutoIncr(exec SqlQueryRunner, insertSql string, params ...interface{}) (int64, error)
+}
+
+// TargetedAutoIncrInserter is implemented by dialects that can
+// perform automatic assignment of any primary key type (i.e. strings
+// for uuids, integers for serials, etc).
+type TargetedAutoIncrInserter interface {
+	// InsertAutoIncrToTarget runs an insert operation and assigns the
+	// automatically generated primary key directly to the passed in
+	// target.  The target should be a pointer to the primary key
+	// field of the value being inserted.
+	InsertAutoIncrToTarget(exec SqlQueryRunner, insertSql string, target interface{}, params ...interface{}) error
+}
+
+// TargetQueryInserter is implemented by dialects that can perform
+// assignment of integer primary key type by executing a query
+// like "select sequence.currval from dual".
+type TargetQueryInserter interface {
+	// TargetQueryInserter runs an insert operation and assigns the
+	// automatically generated primary key retrived by the query
+	// extracted from the GeneratedIdQuery field of the id column.
+	InsertQueryToTarget(exec SqlQueryRunner, insertSql, idSql string, target interface{}, params ...interface{}) error
+}
+
+func standardInsertAutoIncr(exec SqlQueryRunner, insertSql string, params ...interface{}) (int64, error) {
+	res, err := exec.Exec(insertSql, params...)
+	if err != nil {
+		return 0, err
+	}
+	return res.LastInsertId()
+}

@@ -2,9 +2,14 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9da63616-958f-4ad2-af4e-e1bd9d8f4fd6" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/db.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dialect.go" beforeDir="false" afterPath="$PROJECT_DIR$/dialect.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dialect_mysql.go" beforeDir="false" afterPath="$PROJECT_DIR$/dialect_mysql.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/godb.go" beforeDir="false" afterPath="$PROJECT_DIR$/godb.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/godb_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/godb_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/table.go" beforeDir="false" afterPath="$PROJECT_DIR$/table.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/table_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/table_test.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -21,17 +26,26 @@
       <file leaf-file-name="db.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/db.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="36">
-              <caret line="393" column="39" selection-start-line="393" selection-start-column="24" selection-end-line="393" selection-end-column="39" />
+            <state relative-caret-position="151">
+              <caret line="59" column="15" lean-forward="true" selection-start-line="59" selection-start-column="15" selection-end-line="59" selection-end-column="15" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="godb.go" pinned="false" current-in-tab="true">
+      <file leaf-file-name="godb.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/godb.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="239">
-              <caret line="196" lean-forward="true" selection-start-line="196" selection-end-line="196" />
+            <state relative-caret-position="-1931">
+              <caret line="33" column="4" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="4" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dialect.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dialect.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="679">
+              <caret line="86" column="47" lean-forward="true" selection-start-line="86" selection-start-column="47" selection-end-line="86" selection-end-column="47" />
             </state>
           </provider>
         </entry>
@@ -39,8 +53,8 @@
       <file leaf-file-name="godb_test.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/godb_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="296">
-              <caret line="101" lean-forward="true" selection-start-line="101" selection-end-line="101" />
+            <state relative-caret-position="-936">
+              <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
             </state>
           </provider>
         </entry>
@@ -48,8 +62,17 @@
       <file leaf-file-name="table.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/table.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="195">
-              <caret line="18" column="1" lean-forward="true" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
+            <state relative-caret-position="147">
+              <caret line="261" lean-forward="true" selection-start-line="261" selection-end-line="261" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dialect_mysql.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/dialect_mysql.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="102">
+              <caret line="138" column="45" selection-start-line="138" selection-start-column="45" selection-end-line="138" selection-end-column="45" />
             </state>
           </provider>
         </entry>
@@ -57,11 +80,8 @@
       <file leaf-file-name="table_test.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/table_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="317">
-              <caret line="206" lean-forward="true" selection-start-line="206" selection-end-line="206" />
-              <folding>
-                <element signature="e#14#52#0" expanded="true" />
-              </folding>
+            <state relative-caret-position="230">
+              <caret line="243" column="21" selection-start-line="243" selection-start-column="21" selection-end-line="243" selection-end-column="21" />
             </state>
           </provider>
         </entry>
@@ -69,7 +89,7 @@
       <file leaf-file-name="column.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/column.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="54">
+            <state relative-caret-position="60">
               <caret line="4" column="5" selection-start-line="4" selection-start-column="5" selection-end-line="4" selection-end-column="5" />
             </state>
           </provider>
@@ -78,17 +98,8 @@
       <file leaf-file-name="select.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/select.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="429">
+            <state relative-caret-position="4020">
               <caret line="272" selection-start-line="272" selection-end-line="272" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="functions_test.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/functions_test.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="135">
-              <caret line="14" column="14" selection-start-line="14" selection-start-column="14" selection-end-line="14" selection-end-column="14" />
             </state>
           </provider>
         </entry>
@@ -96,7 +107,7 @@
       <file leaf-file-name="db_test.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/db_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-17">
+            <state relative-caret-position="173">
               <caret line="48" column="5" lean-forward="true" selection-start-line="48" selection-start-column="5" selection-end-line="48" selection-end-column="5" />
             </state>
           </provider>
@@ -128,21 +139,21 @@
         <option value="$PROJECT_DIR$/reflect_test.go" />
         <option value="$PROJECT_DIR$/nulltype.go" />
         <option value="$PROJECT_DIR$/column.go" />
-        <option value="$PROJECT_DIR$/dialect.go" />
         <option value="$PROJECT_DIR$/rows.go" />
         <option value="$PROJECT_DIR$/transaction.go" />
-        <option value="$PROJECT_DIR$/dialect_mysql.go" />
         <option value="$PROJECT_DIR$/functions.go" />
         <option value="$PROJECT_DIR$/errors.go" />
         <option value="$PROJECT_DIR$/db_test.go" />
         <option value="$PROJECT_DIR$/functions_test.go" />
         <option value="$PROJECT_DIR$/select.go" />
-        <option value="$PROJECT_DIR$/table.go" />
         <option value="$PROJECT_DIR$/index.go" />
-        <option value="$PROJECT_DIR$/table_test.go" />
         <option value="$PROJECT_DIR$/godb_test.go" />
         <option value="$PROJECT_DIR$/db.go" />
+        <option value="$PROJECT_DIR$/table.go" />
+        <option value="$PROJECT_DIR$/dialect.go" />
         <option value="$PROJECT_DIR$/godb.go" />
+        <option value="$PROJECT_DIR$/table_test.go" />
+        <option value="$PROJECT_DIR$/dialect_mysql.go" />
       </list>
     </option>
   </component>
@@ -215,8 +226,8 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Go Test.TestTableMap_Create in godb">
-    <configuration name="TestDbUtils_SelectOne in godb" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Go Test.TestDbUtils_Insert in godb">
+    <configuration name="TestDbUtils_Insert in godb" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="godb" />
       <working_directory value="$PROJECT_DIR$" />
       <go_parameters value="-i" />
@@ -225,18 +236,7 @@
       <package value="godb" />
       <directory value="$PROJECT_DIR$/" />
       <filePath value="$PROJECT_DIR$/" />
-      <pattern value="^TestDbUtils_SelectOne$" />
-    </configuration>
-    <configuration name="TestDbUtils_SelectOne2 in godb" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
-      <module name="godb" />
-      <working_directory value="$PROJECT_DIR$" />
-      <go_parameters value="-i" />
-      <framework value="gotest" />
-      <kind value="PACKAGE" />
-      <package value="godb" />
-      <directory value="$PROJECT_DIR$/" />
-      <filePath value="$PROJECT_DIR$/" />
-      <pattern value="^TestDbUtils_SelectOne2$" />
+      <pattern value="^TestDbUtils_Insert$" />
     </configuration>
     <configuration name="TestDbUtils_SelectOne3 in godb" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="godb" />
@@ -271,53 +271,62 @@
       <filePath value="$PROJECT_DIR$/" />
       <pattern value="^TestTableMap_Create$" />
     </configuration>
+    <configuration name="table_test.go" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="godb" />
+      <working_directory value="$PROJECT_DIR$" />
+      <go_parameters value="-i" />
+      <framework value="gotest" />
+      <kind value="FILE" />
+      <directory value="$PROJECT_DIR$/" />
+      <filePath value="$PROJECT_DIR$/table_test.go" />
+    </configuration>
     <list>
-      <item itemvalue="Go Test.TestDbUtils_SelectOne in godb" />
-      <item itemvalue="Go Test.TestDbUtils_SelectOne2 in godb" />
       <item itemvalue="Go Test.TestDbUtils_SelectOne3 in godb" />
       <item itemvalue="Go Test.TestDbUtils_selectlist in godb" />
       <item itemvalue="Go Test.TestTableMap_Create in godb" />
+      <item itemvalue="Go Test.TestDbUtils_Insert in godb" />
+      <item itemvalue="Go Test.table_test.go" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Go Test.TestDbUtils_Insert in godb" />
+        <item itemvalue="Go Test.table_test.go" />
         <item itemvalue="Go Test.TestTableMap_Create in godb" />
         <item itemvalue="Go Test.TestDbUtils_selectlist in godb" />
         <item itemvalue="Go Test.TestDbUtils_SelectOne3 in godb" />
-        <item itemvalue="Go Test.TestDbUtils_SelectOne2 in godb" />
-        <item itemvalue="Go Test.TestDbUtils_SelectOne in godb" />
       </list>
     </recent_temporary>
   </component>
   <component name="TestHistory">
-    <history-entry file="TestTableMap_Create_in_godb - 2018.07.03 at 21h 03m 26s.xml">
-      <configuration name="TestTableMap_Create in godb" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestDbUtils_Insert_in_godb - 2018.07.04 at 21h 19m 54s.xml">
+      <configuration name="TestDbUtils_Insert in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestTableMap_Create_in_godb - 2018.07.03 at 21h 03m 38s.xml">
-      <configuration name="TestTableMap_Create in godb" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestDbUtils_Insert_in_godb - 2018.07.04 at 21h 22m 57s.xml">
+      <configuration name="TestDbUtils_Insert in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestTableMap_Create_in_godb - 2018.07.03 at 21h 07m 30s.xml">
-      <configuration name="TestTableMap_Create in godb" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestDbUtils_Insert_in_godb - 2018.07.04 at 21h 26m 27s.xml">
+      <configuration name="TestDbUtils_Insert in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestTableMap_Create_in_godb - 2018.07.03 at 21h 26m 06s.xml">
-      <configuration name="TestTableMap_Create in godb" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestDbUtils_Insert_in_godb - 2018.07.04 at 21h 28m 05s.xml">
+      <configuration name="TestDbUtils_Insert in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestTableMap_Create_in_godb - 2018.07.03 at 21h 27m 17s.xml">
-      <configuration name="TestTableMap_Create in godb" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestDbUtils_Insert_in_godb - 2018.07.04 at 21h 28m 59s.xml">
+      <configuration name="TestDbUtils_Insert in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestTableMap_Create_in_godb - 2018.07.03 at 21h 33m 11s.xml">
-      <configuration name="TestTableMap_Create in godb" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestDbUtils_Insert_in_godb - 2018.07.04 at 21h 32m 20s.xml">
+      <configuration name="TestDbUtils_Insert in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestTableMap_Create_in_godb - 2018.07.03 at 21h 33m 36s.xml">
-      <configuration name="TestTableMap_Create in godb" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestDbUtils_Insert_in_godb - 2018.07.04 at 21h 38m 48s.xml">
+      <configuration name="TestDbUtils_Insert in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestTableMap_Create_in_godb - 2018.07.03 at 21h 33m 56s.xml">
-      <configuration name="TestTableMap_Create in godb" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestDbUtils_Insert_in_godb - 2018.07.04 at 21h 39m 28s.xml">
+      <configuration name="TestDbUtils_Insert in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestTableMap_Create_in_godb - 2018.07.03 at 21h 36m 32s.xml">
-      <configuration name="TestTableMap_Create in godb" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestDbUtils_Insert_in_godb - 2018.07.04 at 21h 52m 55s.xml">
+      <configuration name="TestDbUtils_Insert in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
-    <history-entry file="TestTableMap_Create_in_godb - 2018.07.03 at 21h 47m 58s.xml">
-      <configuration name="TestTableMap_Create in godb" configurationId="GoTestRunConfiguration" />
+    <history-entry file="TestDbUtils_Insert_in_godb - 2018.07.04 at 21h 58m 28s.xml">
+      <configuration name="TestDbUtils_Insert in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
   </component>
   <component name="ToolWindowManager">
@@ -329,7 +338,7 @@
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="right" id="Database" order="3" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.28990227" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.30130294" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="7" />
@@ -574,13 +583,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dialect_mysql.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1995">
-          <caret line="138" column="17" selection-start-line="138" selection-start-column="17" selection-end-line="138" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/Cellar/go/1.10.2/libexec/src/os/env.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="141">
@@ -615,13 +617,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/dialect.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="5" selection-start-line="4" selection-start-column="5" selection-end-line="4" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///usr/local/Cellar/go/1.10.2/libexec/src/reflect/type.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="119">
@@ -645,14 +640,14 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/column.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
+        <state relative-caret-position="60">
           <caret line="4" column="5" selection-start-line="4" selection-start-column="5" selection-end-line="4" selection-end-column="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/select.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="429">
+        <state relative-caret-position="4020">
           <caret line="272" selection-start-line="272" selection-end-line="272" />
         </state>
       </provider>
@@ -664,20 +659,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/db_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-17">
-          <caret line="48" column="5" lean-forward="true" selection-start-line="48" selection-start-column="5" selection-end-line="48" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/table.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="195">
-          <caret line="18" column="1" lean-forward="true" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/nulltypes.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="54">
@@ -685,34 +666,59 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/table_test.go">
+    <entry file="file://$PROJECT_DIR$/db_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="317">
-          <caret line="206" lean-forward="true" selection-start-line="206" selection-end-line="206" />
-          <folding>
-            <element signature="e#14#52#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="173">
+          <caret line="48" column="5" lean-forward="true" selection-start-line="48" selection-start-column="5" selection-end-line="48" selection-end-column="5" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/godb_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="296">
-          <caret line="101" lean-forward="true" selection-start-line="101" selection-end-line="101" />
+        <state relative-caret-position="-936">
+          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialect.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="679">
+          <caret line="86" column="47" lean-forward="true" selection-start-line="86" selection-start-column="47" selection-end-line="86" selection-end-column="47" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/table.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="147">
+          <caret line="261" lean-forward="true" selection-start-line="261" selection-end-line="261" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/table_test.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="230">
+          <caret line="243" column="21" selection-start-line="243" selection-start-column="21" selection-end-line="243" selection-end-column="21" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/db.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="36">
-          <caret line="393" column="39" selection-start-line="393" selection-start-column="24" selection-end-line="393" selection-end-column="39" />
+        <state relative-caret-position="151">
+          <caret line="59" column="15" lean-forward="true" selection-start-line="59" selection-start-column="15" selection-end-line="59" selection-end-column="15" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/godb.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="239">
-          <caret line="196" lean-forward="true" selection-start-line="196" selection-end-line="196" />
+        <state relative-caret-position="-1931">
+          <caret line="33" column="4" selection-start-line="33" selection-start-column="4" selection-end-line="33" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialect_mysql.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="102">
+          <caret line="138" column="45" selection-start-line="138" selection-start-column="45" selection-end-line="138" selection-end-column="45" />
         </state>
       </provider>
     </entry>

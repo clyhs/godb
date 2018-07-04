@@ -136,7 +136,7 @@ func (d MySQLDialect) BindVar(i int) string {
 }
 
 func (d MySQLDialect) InsertAutoIncr(queryRunner SqlQueryRunner, insertSql string, params ...interface{}) (int64, error) {
-	return 0, nil
+	return standardInsertAutoIncr(queryRunner, insertSql, params...)
 }
 
 func (d MySQLDialect) QuoteField(f string) string {

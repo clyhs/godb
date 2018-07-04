@@ -20,6 +20,8 @@ func initDB() *DbUtils {
 	return dbUtils
 }
 
+
+
 func TestDbUtils_SelectInt(t *testing.T) {
 	dbUtils:=initDB()
 
@@ -98,8 +100,5 @@ func selectNullInt(dbUtils *DbUtils, query string, args ...interface{}) sql.Null
 	return i64
 }
 
-func _insert(dbUtils *DbUtils, list ...interface{}) {
-
-}
 
 

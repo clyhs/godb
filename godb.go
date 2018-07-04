@@ -187,12 +187,60 @@ func update(dbUtils *DbUtils, queryRunner SqlQueryRunner, list ...interface{}) (
 
 func insert(dbUtils *DbUtils, queryRunner SqlQueryRunner, list ...interface{}) error {
 
-	for _, ptr := range list {
-
+	for i, ptr := range list {
+        fmt.Println(i)
 		table, elem, err := dbUtils.tableForPointer(ptr, false)
+
 		if err != nil {
 			return err
 		}
+		bi,err:=table.insert(elem)
+		fmt.Println(bi)
+
+		if err != nil {
+			return err
+		}
+
+		if bi.autoIncrIdx > -1 {
+			f := elem.FieldByName(bi.autoIncrFieldName)
+			switch inserter := dbUtils.Dialect.(type) {
+			case IntegerAutoIncrInserter:
+				id, err := inserter.InsertAutoIncr(queryRunner, bi.query, bi.args...)
+				if err != nil {
+					return err
+				}
+				k := f.Kind()
+				if (k == reflect.Int) || (k == reflect.Int16) || (k == reflect.Int32) || (k == reflect.Int64) {
+					f.SetInt(id)
+				} else if (k == reflect.Uint) || (k == reflect.Uint16) || (k == reflect.Uint32) || (k == reflect.Uint64) {
+					f.SetUint(uint64(id))
+				} else {
+					return fmt.Errorf("godb: cannot set autoincrement value on non-Int field. SQL=%s  autoIncrIdx=%d autoIncrFieldName=%s", bi.query, bi.autoIncrIdx, bi.autoIncrFieldName)
+				}
+			case TargetedAutoIncrInserter:
+				err := inserter.InsertAutoIncrToTarget(queryRunner, bi.query, f.Addr().Interface(), bi.args...)
+				if err != nil {
+					return err
+				}
+			case TargetQueryInserter:
+				var idQuery = table.ColMap(bi.autoIncrFieldName).GeneratedIdQuery
+				if idQuery == "" {
+					return fmt.Errorf("godb: cannot set %s value if its ColumnMap.GeneratedIdQuery is empty", bi.autoIncrFieldName)
+				}
+				err := inserter.InsertQueryToTarget(queryRunner, bi.query, idQuery, f.Addr().Interface(), bi.args...)
+				if err != nil {
+					return err
+				}
+			default:
+				return fmt.Errorf("godb: cannot use autoincrement fields on dialects that do not implement an autoincrementing interface")
+			}
+		}else {
+			_, err := queryRunner.Exec(bi.query, bi.args...)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 
 	return nil
