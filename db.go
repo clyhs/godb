@@ -118,8 +118,8 @@ func (dbUtils *DbUtils) SelectOne(holder interface{}, query string, args ...inte
 
 func (dbUtils *DbUtils) QueryRow(query string, args ...interface{}) *sql.Row {
 
-
-	return nil
+	fmt.Println("queryRow")
+	return queryRow(dbUtils,query,args...)
 }
 
 func (dbUtils *DbUtils) Query(q string, args ...interface{}) (*sql.Rows, error) {

@@ -170,11 +170,77 @@ func columnToFieldIndex(m *DbUtils, t reflect.Type, cols []string) ([][]int, err
 	return colToFieldIndex, nil
 }
 
+func tableFor(dbUtils *DbUtils, t reflect.Type, i interface{}) (*TableMap, error) {
 
+	table, err := dbUtils.TableFor(t, true)
+	if err != nil {
+		return nil, err
+	}
+	return table, nil
+}
 
 func get(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{},
 	keys ...interface{}) (interface{}, error) {
-    return nil,nil
+
+	t, err := toType(i)
+	if err != nil {
+		fmt.Println("1")
+		panic(err)
+		return nil, err
+	}
+
+	table, err := tableFor(dbUtils, t, i)
+	if err != nil {
+		fmt.Println("2")
+		panic(err)
+		return nil, err
+	}
+
+	plan := table.bindGet()
+
+	v := reflect.New(t)
+
+	dest := make([]interface{}, len(plan.argFields))
+
+	conv := dbUtils.TypeConverter
+	custScan := make([]CustomScanner, 0)
+
+	for x, fieldName := range plan.argFields {
+
+		f := v.Elem().FieldByName(fieldName)
+		target := f.Addr().Interface()
+		if conv != nil {
+			scanner, ok := conv.FromDb(target)
+			if ok {
+				target = scanner.Holder
+				custScan = append(custScan, scanner)
+			}
+		}
+		dest[x] = target
+	}
+
+	row := queryRunner.QueryRow(plan.query, keys...)
+
+	err = row.Scan(dest...)
+	if err != nil {
+        fmt.Println(err)
+		if err == sql.ErrNoRows {
+
+			err = nil
+		}
+		return nil, err
+	}
+
+	fmt.Println("custScan")
+	for _, c := range custScan {
+		err = c.Bind()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+
+	return v.Interface(),nil
 }
 
 func delete(dbUtils *DbUtils, queryRunner SqlQueryRunner, list ...interface{}) (int64, error) {
@@ -256,6 +322,18 @@ func query(queryRunner SqlQueryRunner, query string, args ...interface{}) (*sql.
 	}
 	return nil, nil
 }
+
+func queryRow(queryRunner SqlQueryRunner, query string, args ...interface{}) *sql.Row {
+	switch m := queryRunner.(type) {
+	case *DbUtils:
+		return m.Db.QueryRow(query,args...)
+	case *Transaction:
+		return m.tx.QueryRow(query,args...)
+	}
+
+	return nil
+}
+
 
 
 

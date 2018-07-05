@@ -317,3 +317,130 @@ func (t *TableMap)insert(elem reflect.Value) (bindInstance, error)  {
 
 	return plan.createBindInstance(elem, t.dbUtils.TypeConverter)
 }
+
+
+func (t *TableMap) bindGet() *bindPlan {
+	plan := &bindPlan{}
+	plan.once.Do(func() {
+		s := bytes.Buffer{}
+		s.WriteString("select ")
+
+		x := 0
+		for _, col := range t.Columns {
+			if !col.Transient {
+				if x > 0 {
+					s.WriteString(",")
+				}
+				s.WriteString(t.dbUtils.Dialect.QuoteField(col.ColumnName))
+				plan.argFields = append(plan.argFields, col.fieldName)
+				x++
+			}
+		}
+		s.WriteString(" from ")
+		s.WriteString(t.dbUtils.Dialect.QuotedTableForQuery(t.SchemaName, t.TableName))
+		s.WriteString(" where ")
+		for x := range t.keys {
+			col := t.keys[x]
+			if x > 0 {
+				s.WriteString(" and ")
+			}
+			s.WriteString(t.dbUtils.Dialect.QuoteField(col.ColumnName))
+			s.WriteString("=")
+			s.WriteString(t.dbUtils.Dialect.BindVar(x))
+
+			plan.keyFields = append(plan.keyFields, col.fieldName)
+		}
+		s.WriteString(t.dbUtils.Dialect.QuerySuffix())
+
+		plan.query = s.String()
+	})
+
+	fmt.Println(plan.query)
+
+	return plan
+}
+
+func (t *TableMap) bindUpdate(elem reflect.Value) (bindInstance, error) {
+
+
+	plan := &bindPlan{}
+	plan.once.Do(func() {
+		s := bytes.Buffer{}
+		s.WriteString(fmt.Sprintf("update %s set ", t.dbUtils.Dialect.QuotedTableForQuery(t.SchemaName, t.TableName)))
+		x := 0
+
+		for y := range t.Columns {
+			col := t.Columns[y]
+			if !col.isAutoIncr && !col.Transient{
+				if x > 0 {
+					s.WriteString(", ")
+				}
+				s.WriteString(t.dbUtils.Dialect.QuoteField(col.ColumnName))
+				s.WriteString("=")
+				s.WriteString(t.dbUtils.Dialect.BindVar(x))
+
+
+				plan.argFields = append(plan.argFields, col.fieldName)
+
+				x++
+			}
+		}
+
+		s.WriteString(" where ")
+		for y := range t.keys {
+			col := t.keys[y]
+			if y > 0 {
+				s.WriteString(" and ")
+			}
+			s.WriteString(t.dbUtils.Dialect.QuoteField(col.ColumnName))
+			s.WriteString("=")
+			s.WriteString(t.dbUtils.Dialect.BindVar(x))
+
+			plan.argFields = append(plan.argFields, col.fieldName)
+			plan.keyFields = append(plan.keyFields, col.fieldName)
+			x++
+		}
+
+		s.WriteString(t.dbUtils.Dialect.QuerySuffix())
+
+		plan.query = s.String()
+	})
+
+	return plan.createBindInstance(elem, t.dbUtils.TypeConverter)
+}
+
+
+func (t *TableMap) bindDelete(elem reflect.Value) (bindInstance, error) {
+	plan := &bindPlan{}
+	plan.once.Do(func() {
+		s := bytes.Buffer{}
+		s.WriteString(fmt.Sprintf("delete from %s", t.dbUtils.Dialect.QuotedTableForQuery(t.SchemaName, t.TableName)))
+
+		for y := range t.Columns {
+			col := t.Columns[y]
+			if !col.Transient {
+
+			}
+		}
+
+		s.WriteString(" where ")
+		for x := range t.keys {
+			k := t.keys[x]
+			if x > 0 {
+				s.WriteString(" and ")
+			}
+			s.WriteString(t.dbUtils.Dialect.QuoteField(k.ColumnName))
+			s.WriteString("=")
+			s.WriteString(t.dbUtils.Dialect.BindVar(x))
+
+			plan.keyFields = append(plan.keyFields, k.fieldName)
+			plan.argFields = append(plan.argFields, k.fieldName)
+		}
+
+		s.WriteString(t.dbUtils.Dialect.QuerySuffix())
+
+		plan.query = s.String()
+	})
+
+	return plan.createBindInstance(elem, t.dbUtils.TypeConverter)
+}

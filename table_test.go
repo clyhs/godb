@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"database/sql/driver"
 	"strconv"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Student struct {
@@ -54,8 +55,15 @@ type IdCreatedExternal struct {
 }
 
 type CustomStringType string
+
 type CustomDate struct {
 	time.Time
+}
+
+
+type WithCustomDate struct {
+	Id    int64
+	Added CustomDate
 }
 
 
@@ -122,6 +130,7 @@ func (me testTypeConverter) FromDb(target interface{}) (CustomScanner, bool) {
 				return errors.New(fmt.Sprint("FromDb: Unable to convert target to *CustomDate: ", reflect.TypeOf(target)))
 			}
 			dateTarget.Time = *t
+			fmt.Println("time")
 			return nil
 		}
 		return CustomScanner{new(time.Time), target, binder}, true
@@ -182,28 +191,6 @@ type WithNullTime struct {
 	Time NullTime
 }
 
-func TestTableMap_Create(t *testing.T)  {
-
-	dbUtils:=initDB()
-	dbUtils.AddTableWithName(Student{},"t_student").SetKeys(true, "Id")
-	dbUtils.AddTableWithName(StudentTag{},"t_student_tag")
-	dbUtils.AddTableWithName(StudentTransientTag{},"t_student_ts_tag").SetKeys(true, "s_id")
-	dbUtils.AddTableWithName(OverStudent{}, "t_student_over").SetKeys(false, "Id")
-	dbUtils.AddTableWithName(IdCreated{}, "t_id_created").SetKeys(true, "Id")
-	dbUtils.AddTableWithName(TypeConversionExample{}, "t_type_conv").SetKeys(true, "Id")
-
-	dbUtils.AddTableWithName(Person{}, "t_person").SetKeys(true, "Id").AddIndex("PersonIndex", "Btree", []string{"Name"}).SetUnique(true)
-
-	dbUtils.AddTableWithName(WithTime{}, "t_time_test").SetKeys(true, "Id")
-	dbUtils.AddTableWithName(WithNullTime{}, "t_nulltime_test").SetKeys(false, "Id")
-
-	dbUtils.TypeConverter = testTypeConverter{}
-	err:=dbUtils.CreateTablesIfNotExists()
-
-	if err!=nil{
-		panic(err)
-	}
-}
 
 func createTable() *DbUtils  {
 	dbUtils:=initDB()
@@ -218,6 +205,7 @@ func createTable() *DbUtils  {
 
 	dbUtils.AddTableWithName(WithTime{}, "t_time_test").SetKeys(true, "Id")
 	dbUtils.AddTableWithName(WithNullTime{}, "t_nulltime_test").SetKeys(false, "Id")
+	dbUtils.AddTableWithName(WithCustomDate{}, "t_customdate").SetKeys(true, "Id")
 
 	dbUtils.TypeConverter = testTypeConverter{}
 	err:=dbUtils.CreateTablesIfNotExists()
@@ -237,10 +225,56 @@ func TestDbUtils_Insert(t *testing.T) {
 	if err!=nil {
 		panic(err)
 	}
+}
+
+func TestCustomDate_insert(t *testing.T)  {
+	test1 := &WithCustomDate{Added: CustomDate{Time: time.Now().Truncate(time.Second)}}
+	dbUtils:=createTable()
+
+	err:=dbUtils.Insert(test1)
+
+	if err != nil {
+		t.Errorf("Could not insert struct with custom date field: %s", err)
+		t.FailNow()
+	}
+	result, err :=dbUtils.Get(new(WithCustomDate),test1.Id)
+
+	t.Skip("TestCustomDateType can't run Get() with the mysql driver; skipping the rest of this test...")
+
+	if err != nil {
+		t.Errorf("Could not get struct with custom date field: %s", err)
+		t.FailNow()
+	}
+	fmt.Println(result)
+	test2 := result.(*WithCustomDate)
+	if test2.Added.UTC() != test1.Added.UTC() {
+		t.Errorf("Custom dates do not match: %v != %v", test2.Added.UTC(), test1.Added.UTC())
+	}else{
+		fmt.Println("good")
+	}
+}
+
+func TestDbUtils_withtime(t *testing.T)  {
+	test1:=&WithTime{Time:time.Now().Truncate(time.Second)}
+	dbUtils:=createTable()
+	err:=dbUtils.Insert(test1)
+	if err!=nil{
+		panic(err)
+	}
+	result ,err:=dbUtils.Get(new(WithTime),test1.Id)
+	if err!=nil{
+		panic(err)
+	}
+	fmt.Println(result)
 
 }
+
 
 func _insert(dbUtils *DbUtils, list ...interface{}) error {
 	err:=dbUtils.Insert(list...)
 	return err
+}
+
+func close(dbUtils *DbUtils)  {
+	dbUtils.Db.Close()
 }
