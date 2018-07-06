@@ -48,6 +48,14 @@ type SqlTyper interface {
 	SqlType() driver.Value
 }
 
+// for fields that exists in DB table, but not exists in struct
+type dummyField struct{}
+
+// Scan implements the Scanner interface.
+func (nt *dummyField) Scan(value interface{}) error {
+	return nil
+}
+
 func maybeExpandNamedQuery(dbUtils *DbUtils, query string, args []interface{}) (string, []interface{}) {
 	var (
 		arg    = args[0]
@@ -131,10 +139,15 @@ func extractExecutorAndContext(e SqlQueryRunner) (reflect.Value, context.Context
 	return reflect.ValueOf(nil), nil
 }*/
 
-func columnToFieldIndex(m *DbUtils, t reflect.Type, cols []string) ([][]int, error) {
+func columnToFieldIndex(m *DbUtils, t reflect.Type,name string, cols []string) ([][]int, error) {
 
 	colToFieldIndex := make([][]int, len(cols))
 
+	tableMapped := false
+	table := tableOrNil(m, t, name)
+	if table != nil {
+		tableMapped = true
+	}
 	missingColNames := []string{}
 
 	for x := range cols {
@@ -142,7 +155,6 @@ func columnToFieldIndex(m *DbUtils, t reflect.Type, cols []string) ([][]int, err
 		field, found := t.FieldByNameFunc(func(fieldName string) bool {
 
 			field, _ := t.FieldByName(fieldName)
-			fmt.Println(fieldName)
 			cArguments := strings.Split(field.Tag.Get("db"), ",")
 			fieldName = cArguments[0]
 
@@ -150,6 +162,15 @@ func columnToFieldIndex(m *DbUtils, t reflect.Type, cols []string) ([][]int, err
 				return false
 			} else if fieldName == "" {
 				fieldName = field.Name
+			}
+			if tableMapped {
+
+				colMap := colMapOrNil(table, fieldName)
+				fmt.Println(colMap)
+				fmt.Println(fieldName)
+				if colMap != nil {
+					fieldName = colMap.ColumnName
+				}
 			}
 			return colName == strings.ToLower(fieldName)
 		})
@@ -161,7 +182,6 @@ func columnToFieldIndex(m *DbUtils, t reflect.Type, cols []string) ([][]int, err
 		}
 	}
 	if len(missingColNames) > 0 {
-		fmt.Println(missingColNames)
 		return colToFieldIndex, &NoFieldInTypeError{
 			TypeName:        t.Name(),
 			MissingColNames: missingColNames,
@@ -184,15 +204,11 @@ func get(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{},
 
 	t, err := toType(i)
 	if err != nil {
-		fmt.Println("1")
-		panic(err)
 		return nil, err
 	}
 
 	table, err := tableFor(dbUtils, t, i)
 	if err != nil {
-		fmt.Println("2")
-		panic(err)
 		return nil, err
 	}
 
@@ -223,7 +239,6 @@ func get(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{},
 
 	err = row.Scan(dest...)
 	if err != nil {
-        fmt.Println(err)
 		if err == sql.ErrNoRows {
 
 			err = nil
@@ -231,7 +246,6 @@ func get(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{},
 		return nil, err
 	}
 
-	fmt.Println("custScan")
 	for _, c := range custScan {
 		err = c.Bind()
 		if err != nil {

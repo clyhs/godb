@@ -173,20 +173,19 @@ func rawselect(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{}, quer
 		intoStruct = t.Kind() == reflect.Struct
 	}
 
-	fmt.Println(appendToSlice)
+	fmt.Println("-----------------")
 
 	if len(args) == 1 {
 		query, args = maybeExpandNamedQuery(dbUtils, query, args)
 	}
-
-	fmt.Println(query)
-
 
 	rows, err := queryRunner.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
+
+	fmt.Println("-----------------")
 
 	cols, err := rows.Columns()
 	if err != nil {
@@ -201,22 +200,23 @@ func rawselect(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{}, quer
 
 	var colToFieldIndex [][]int
 
-	colToFieldIndex, err = columnToFieldIndex(dbUtils, t, cols)
-	if err != nil {
-
-		if !NonFatalError(err) {
-			return nil, err
+	if intoStruct {
+		colToFieldIndex, err = columnToFieldIndex(dbUtils, t, "",cols)
+		if err != nil {
+			if !NonFatalError(err) {
+				return nil, err
+			}
+			nonFatalErr = err
 		}
-		nonFatalErr = err
 	}
 
+	conv := dbUtils.TypeConverter
 
-	fmt.Println(colToFieldIndex)
-
+	fmt.Println("-----------------")
 	//list       = make([]interface{}, 0)
 	var (
 		list       = make([]interface{}, 0)
-		//sliceValue = reflect.Indirect(reflect.ValueOf(i))
+		sliceValue = reflect.Indirect(reflect.ValueOf(i))
 	)
 
 
@@ -234,27 +234,49 @@ func rawselect(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{}, quer
 
 		dest := make([]interface{}, len(cols))
 
+		custScan := make([]CustomScanner, 0)
 		for x := range cols {
 			f := v.Elem()
 			if intoStruct {
 				index := colToFieldIndex[x]
 				if index == nil {
+					var dummy dummyField
+					dest[x] = &dummy
 					continue
 				}
 				f = f.FieldByIndex(index)
 			}
 			target := f.Addr().Interface()
+			if conv != nil {
+				scanner, ok := conv.FromDb(target)
+				if ok {
+					target = scanner.Holder
+					custScan = append(custScan, scanner)
+				}
+			}
 			dest[x] = target
 		}
+
+		fmt.Println(dest)
 
 		err = rows.Scan(dest...)
 		if err != nil {
 			return nil, err
 		}
-
-		list = append(list, v.Interface())
+		if appendToSlice {
+			if !pointerElements {
+				v = v.Elem()
+			}
+			sliceValue.Set(reflect.Append(sliceValue, v))
+		} else {
+			list = append(list, v.Interface())
+		}
+	}
+	if appendToSlice && sliceValue.IsNil() {
+		sliceValue.Set(reflect.MakeSlice(sliceValue.Type(), 0, 0))
 	}
 
+	fmt.Println("-----------------")
 	return list, nonFatalErr
 }
 
