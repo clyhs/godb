@@ -11,6 +11,7 @@ import (
 	"strconv"
 	_ "github.com/go-sql-driver/mysql"
 	"strings"
+	"database/sql"
 )
 
 type Student struct {
@@ -391,28 +392,28 @@ func Test_PersistentUser(t *testing.T) {
 	if err != nil {
 		panic(err)
 	}
+	/*
+		fmt.Println("insert...")
+		// prove we can pass a pointer into Get
+		pu2, err := dbUtils.Get(pu, pu.Key)
+		if err != nil {
+			panic(err)
+		}
+		if !reflect.DeepEqual(pu, pu2) {
+			t.Errorf("%v!=%v", pu, pu2)
+		}
 
-	fmt.Println("insert...")
-	// prove we can pass a pointer into Get
-	pu2, err := dbUtils.Get(pu, pu.Key)
-	if err != nil {
-		panic(err)
-	}
-	if !reflect.DeepEqual(pu, pu2) {
-		t.Errorf("%v!=%v", pu, pu2)
-	}
-
-	fmt.Println("select...")
-	arr, err := dbUtils.Select(pu, "select * from "+tableName(dbUtils, PersistentUser{}))
-	if err != nil {
-		panic(err)
-	}
-	if !reflect.DeepEqual(pu, arr[0]) {
-		t.Errorf("%v!=%v", pu, arr[0])
-	}
-
+		fmt.Println("select...")
+		arr, err := dbUtils.Select(pu, "select * from "+tableName(dbUtils, PersistentUser{}))
+		if err != nil {
+			panic(err)
+		}
+		if !reflect.DeepEqual(pu, arr[0]) {
+			t.Errorf("%v!=%v", pu, arr[0])
+		}
+		*/
 	// prove we can get the results back in a slice
-	fmt.Println("insert2...")
+	fmt.Println("select2...")
 	var puArr []*PersistentUser
 	_, err = dbUtils.Select(&puArr, "select * from "+tableName(dbUtils, PersistentUser{}))
 	if err != nil {
@@ -494,7 +495,377 @@ func Test_PersistentUser(t *testing.T) {
 	}
 }
 
+func TestDbutils_NamedQueryMap(t *testing.T)  {
+	dbUtils := initDB()
+	dbUtils.Exec("drop table if exists PersistentUser")
+	table := dbUtils.AddTable(PersistentUser{}).SetKeys(false, "Key")
+	table.ColMap("Key").Rename("mykey")
+	err := dbUtils.CreateTablesIfNotExists()
+	if err != nil {
+		panic(err)
+	}
+	defer close(dbUtils)
+	pu := &PersistentUser{43, "33r", false}
+	pu2 := &PersistentUser{500, "abc", false}
+	err = dbUtils.Insert(pu, pu2)
+	if err != nil {
+		panic(err)
+	}
 
+	// Test simple case
+	var puArr []*PersistentUser
+	_, err = dbUtils.Select(&puArr, "select * from "+tableName(dbUtils, PersistentUser{})+" where mykey = :Key", map[string]interface{}{
+		"Key": 43,
+	})
+	if err != nil {
+		t.Errorf("Failed to select: %s", err)
+		t.FailNow()
+	}
+	if len(puArr) != 1 {
+		t.Errorf("Expected one persistentuser, found none")
+	}
+	if !reflect.DeepEqual(pu, puArr[0]) {
+		t.Errorf("%v!=%v", pu, puArr[0])
+	}
+
+	puArr = nil
+	_, err = dbUtils.Select(&puArr, "select * from "+tableName(dbUtils, PersistentUser{})+" where mykey = :Key", map[string]int{
+		"Key": 43,
+	})
+	if err != nil {
+		t.Errorf("Failed to select: %s", err)
+		t.FailNow()
+	}
+	if len(puArr) != 1 {
+		t.Errorf("Expected one persistentuser, found none")
+	}
+
+	puArr = nil
+	_, err = dbUtils.Select(&puArr, `
+select * from `+tableName(dbUtils, PersistentUser{})+`
+ where mykey = :Key
+   and `+columnName(dbUtils, PersistentUser{}, "PassedTraining")+` = :PassedTraining
+   and `+columnName(dbUtils, PersistentUser{}, "Id")+` = :Id`, map[string]interface{}{
+		"Key":            43,
+		"PassedTraining": false,
+		"Id":             "33r",
+	})
+	if err != nil {
+		t.Errorf("Failed to select: %s", err)
+		t.FailNow()
+	}
+	if len(puArr) != 1 {
+		t.Errorf("Expected one persistentuser, found none")
+	}
+
+	puArr = nil
+	_, err = dbUtils.Select(&puArr, `
+select * from `+tableName(dbUtils, PersistentUser{})+`
+ where mykey = :Key
+   and `+columnName(dbUtils, PersistentUser{}, "Id")+` != 'abc:def'`, map[string]interface{}{
+		"Key":            43,
+		"PassedTraining": false,
+	})
+	if err != nil {
+		t.Errorf("Failed to select: %s", err)
+		t.FailNow()
+	}
+	if len(puArr) != 1 {
+		t.Errorf("Expected one persistentuser, found none")
+	}
+
+	// Test to delete with Exec and named params.
+	result, err := dbUtils.Exec("delete from "+tableName(dbUtils, PersistentUser{})+" where mykey = :Key", map[string]interface{}{
+		"Key": 43,
+	})
+	count, err := result.RowsAffected()
+	if err != nil {
+		t.Errorf("Failed to exec: %s", err)
+		t.FailNow()
+	}
+	if count != 1 {
+		t.Errorf("Expected 1 persistentuser to be deleted, but %d deleted", count)
+	}
+
+
+}
+
+func TestDbUtils_NameQueryStruct(t *testing.T) {
+
+	dbmap := initDB()
+	dbmap.Exec("drop table if exists PersistentUser")
+	table := dbmap.AddTable(PersistentUser{}).SetKeys(false, "Key")
+	table.ColMap("Key").Rename("mykey")
+	err := dbmap.CreateTablesIfNotExists()
+	if err != nil {
+		panic(err)
+	}
+	defer close(dbmap)
+	pu := &PersistentUser{43, "33r", false}
+	pu2 := &PersistentUser{500, "abc", false}
+	err = dbmap.Insert(pu, pu2)
+	if err != nil {
+		panic(err)
+	}
+
+	// Test select self
+	var puArr []*PersistentUser
+	_, err = dbmap.Select(&puArr, `
+select * from `+tableName(dbmap, PersistentUser{})+`
+ where mykey = :Key
+   and `+columnName(dbmap, PersistentUser{}, "PassedTraining")+` = :PassedTraining
+   and `+columnName(dbmap, PersistentUser{}, "Id")+` = :Id`, pu)
+	if err != nil {
+		t.Errorf("Failed to select: %s", err)
+		t.FailNow()
+	}
+	if len(puArr) != 1 {
+		t.Errorf("Expected one persistentuser, found none")
+	}
+	if !reflect.DeepEqual(pu, puArr[0]) {
+		t.Errorf("%v!=%v", pu, puArr[0])
+	}
+
+	// Test delete self.
+	result, err := dbmap.Exec(`delete from `+tableName(dbmap, PersistentUser{})+`where mykey = :Key
+                   and `+columnName(dbmap, PersistentUser{}, "PassedTraining")+` = :PassedTraining
+                   and `+columnName(dbmap, PersistentUser{}, "Id")+` = :Id`, pu)
+	count, err := result.RowsAffected()
+	if err != nil {
+		t.Errorf("Failed to exec: %s", err)
+		t.FailNow()
+	}
+	if count != 1 {
+		t.Errorf("Expected 1 persistentuser to be deleted, but %d deleted", count)
+	}
+}
+
+type Invoice struct {
+	Id       int64
+	Created  int64
+	Updated  int64
+	Memo     string
+	PersonId int64
+	IsPaid   bool
+}
+
+func Test_ReturnsNonNilSlice(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(Invoice{}, "invoice_test").SetKeys(true, "Id")
+	dbmap.CreateTablesIfNotExists()
+	defer close(dbmap)
+	noResultsSQL := "select * from invoice_test where " + columnName(dbmap, Invoice{}, "Id") + "=99999"
+	var r1 []*Invoice
+	rawSelect(dbmap, &r1, noResultsSQL)
+	if r1 == nil {
+		t.Errorf("r1==nil")
+	}
+
+	r2 := rawSelect(dbmap, Invoice{}, noResultsSQL)
+	if r2 == nil {
+		t.Errorf("r2==nil")
+	}
+}
+
+type Person2 struct {
+	Id      int64
+	Created int64
+	Updated int64
+	FName   string
+	LName   string
+	Version int64
+}
+
+
+type TableWithNull struct {
+	Id      int64
+	Str     sql.NullString
+	Int64   sql.NullInt64
+	Float64 sql.NullFloat64
+	Bool    sql.NullBool
+	Bytes   []byte
+}
+
+func Test_DoubleAddTable(t *testing.T) {
+	dbmap := initDB()
+	t1 := dbmap.AddTable(TableWithNull{}).SetKeys(false, "Id")
+	t2 := dbmap.AddTable(TableWithNull{})
+	dbmap.CreateTablesIfNotExists()
+	if t1 != t2 {
+		t.Errorf("%v != %v", t1, t2)
+	}
+}
+
+// what happens if a legacy table has a null value?
+func Test_NullValues(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTable(TableWithNull{}).SetKeys(false, "Id")
+	dbmap.CreateTablesIfNotExists()
+	defer close(dbmap)
+
+	// insert a row directly
+	rawExec(dbmap, "insert into "+tableName(dbmap, TableWithNull{})+" values (10, null, "+
+		"null, null, null, null)")
+
+	// try to load it
+	expected := &TableWithNull{Id: 10}
+	obj := _get(dbmap, TableWithNull{}, 10)
+	t1 := obj.(*TableWithNull)
+	if !reflect.DeepEqual(expected, t1) {
+		t.Errorf("%v != %v", expected, t1)
+	}
+
+	// update it
+	t1.Str = sql.NullString{"hi", true}
+	expected.Str = t1.Str
+	t1.Int64 = sql.NullInt64{999, true}
+	expected.Int64 = t1.Int64
+	t1.Float64 = sql.NullFloat64{53.33, true}
+	expected.Float64 = t1.Float64
+	t1.Bool = sql.NullBool{true, true}
+	expected.Bool = t1.Bool
+	t1.Bytes = []byte{1, 30, 31, 33}
+	expected.Bytes = t1.Bytes
+	_update(dbmap, t1)
+
+	obj = _get(dbmap, TableWithNull{}, 10)
+	t1 = obj.(*TableWithNull)
+	if t1.Str.String != "hi" {
+		t.Errorf("%s != hi", t1.Str.String)
+	}
+	if !reflect.DeepEqual(expected, t1) {
+		t.Errorf("%v != %v", expected, t1)
+	}
+}
+
+type PersonValuerScanner struct {
+	Person2
+}
+
+// Value implements "database/sql/driver".Valuer.  It will be automatically
+// run by the "database/sql" package when inserting/updating data.
+func (p PersonValuerScanner) Value() (driver.Value, error) {
+	return p.Id, nil
+}
+
+// Scan implements "database/sql".Scanner.  It will be automatically run
+// by the "database/sql" package when reading column data into a field
+// of type PersonValuerScanner.
+func (p *PersonValuerScanner) Scan(value interface{}) (err error) {
+	switch src := value.(type) {
+	case []byte:
+		// TODO: this case is here for mysql only.  For some reason,
+		// one (both?) of the mysql libraries opt to pass us a []byte
+		// instead of an int64 for the bigint column.  We should add
+		// table tests around valuers/scanners and try to solve these
+		// types of odd discrepencies to make it easier for users of
+		// gorp to migrate to other database engines.
+		p.Id, err = strconv.ParseInt(string(src), 10, 64)
+	case int64:
+		// Most libraries pass in the type we'd expect.
+		p.Id = src
+	default:
+		typ := reflect.TypeOf(value)
+		return fmt.Errorf("Expected person value to be convertible to int64, got %v (type %s)", value, typ)
+	}
+	return
+}
+
+type InvoiceWithValuer struct {
+	Id      int64
+	Created int64
+	Updated int64
+	Memo    string
+	Person  PersonValuerScanner `db:"personid"`
+	IsPaid  bool
+}
+
+func Test_ScannerValuer(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(PersonValuerScanner{}, "person_test").SetKeys(true, "Id")
+	dbmap.AddTableWithName(InvoiceWithValuer{}, "invoice_test").SetKeys(true, "Id")
+	err := dbmap.CreateTablesIfNotExists()
+	if err != nil {
+		panic(err)
+	}
+	defer close(dbmap)
+
+	pv := PersonValuerScanner{}
+	pv.FName = "foo"
+	pv.LName = "bar"
+	err = dbmap.Insert(&pv)
+	if err != nil {
+		t.Errorf("Could not insert PersonValuerScanner using Person table: %v", err)
+		t.FailNow()
+	}
+
+	inv := InvoiceWithValuer{}
+	inv.Memo = "foo"
+	inv.Person = pv
+	err = dbmap.Insert(&inv)
+	if err != nil {
+		t.Errorf("Could not insert InvoiceWithValuer using Invoice table: %v", err)
+		t.FailNow()
+	}
+
+	res, err := dbmap.Get(InvoiceWithValuer{}, inv.Id)
+	if err != nil {
+		t.Errorf("Could not get InvoiceWithValuer: %v", err)
+		t.FailNow()
+	}
+	dbInv := res.(*InvoiceWithValuer)
+
+	if dbInv.Person.Id != pv.Id {
+		t.Errorf("InvoiceWithValuer got wrong person ID: %d (expected) != %d (actual)", pv.Id, dbInv.Person.Id)
+	}
+}
+
+func TestColumnProps(t *testing.T) {
+	dbmap := initDB()
+	t1 := dbmap.AddTable(Invoice{}).SetKeys(true, "Id")
+	t1.ColMap("Created").Rename("date_created")
+	t1.ColMap("Updated").SetTransient(true)
+	t1.ColMap("Memo").SetMaxSize(10)
+	t1.ColMap("PersonId").SetUnique(true)
+
+	err := dbmap.CreateTablesIfNotExists()
+	if err != nil {
+		panic(err)
+	}
+	defer close(dbmap)
+
+	// test transient
+	inv := &Invoice{0, 0, 1, "my invoice", 0, true}
+	_insert(dbmap, inv)
+	obj := _get(dbmap, Invoice{}, inv.Id)
+	inv = obj.(*Invoice)
+	if inv.Updated != 0 {
+		t.Errorf("Saved transient column 'Updated'")
+	}
+
+	// test max size
+	inv.Memo = "this memo is too long"
+	err = dbmap.Insert(inv)
+	if err == nil {
+		t.Errorf("max size exceeded, but Insert did not fail.")
+	}
+
+	// test unique - same person id
+	inv = &Invoice{0, 0, 1, "my invoice2", 0, false}
+	err = dbmap.Insert(inv)
+	if err == nil {
+		t.Errorf("same PersonId inserted, but Insert did not fail.")
+	}
+}
+
+
+func rawSelect(dbmap *DbUtils, i interface{}, query string, args ...interface{}) []interface{} {
+	list, err := dbmap.Select(i, query, args...)
+	if err != nil {
+		panic(err)
+	}
+	return list
+}
 
 func _insert(dbUtils *DbUtils, list ...interface{}) error {
 	err:=dbUtils.Insert(list...)
@@ -519,4 +890,29 @@ func columnName(dbUtils *DbUtils, i interface{}, fieldName string) string {
 		return dbUtils.Dialect.QuoteField(table.ColMap(fieldName).ColumnName)
 	}
 	return fieldName
+}
+
+func rawExec(dbmap *DbUtils, query string, args ...interface{}) sql.Result {
+	res, err := dbmap.Exec(query, args...)
+	if err != nil {
+		panic(err)
+	}
+	return res
+}
+
+func _get(dbmap *DbUtils, i interface{}, keys ...interface{}) interface{} {
+	obj, err := dbmap.Get(i, keys...)
+	if err != nil {
+		panic(err)
+	}
+
+	return obj
+}
+
+func _update(dbmap *DbUtils, list ...interface{}) int64 {
+	count, err := dbmap.Update(list...)
+	if err != nil {
+		panic(err)
+	}
+	return count
 }

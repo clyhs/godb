@@ -41,56 +41,55 @@ func (t *Transaction) Get(i interface{}, keys ...interface{}) (interface{}, erro
 
 // Select has the same behavior as DbMap.Select(), but runs in a transaction.
 func (t *Transaction) Select(i interface{}, query string, args ...interface{}) ([]interface{}, error) {
-	return nil, nil
+	return selectlist(t.dbUtils, t, i, query, args...)
 }
 
 // Exec has the same behavior as DbMap.Exec(), but runs in a transaction.
 func (t *Transaction) Exec(query string, args ...interface{}) (sql.Result, error) {
-	return nil, nil
+	return maybeExpandNamedQueryAndExec(t, query, args...)
 }
 
 // SelectInt is a convenience wrapper around the gorp.SelectInt function.
 func (t *Transaction) SelectInt(query string, args ...interface{}) (int64, error) {
-	return 0, nil
+	return SelectInt(t, query, args...)
 }
 
 // SelectNullInt is a convenience wrapper around the gorp.SelectNullInt function.
 func (t *Transaction) SelectNullInt(query string, args ...interface{}) (sql.NullInt64, error) {
-	return sql.NullInt64{}, nil
+	return SelectNullInt(t, query, args...)
 }
 
 // SelectFloat is a convenience wrapper around the gorp.SelectFloat function.
 func (t *Transaction) SelectFloat(query string, args ...interface{}) (float64, error) {
-	return 0, nil
+	return SelectFloat(t, query, args...)
 }
 
 // SelectNullFloat is a convenience wrapper around the gorp.SelectNullFloat function.
 func (t *Transaction) SelectNullFloat(query string, args ...interface{}) (sql.NullFloat64, error) {
-	return sql.NullFloat64{}, nil
+	return SelectNullFloat(t, query, args...)
 }
 
 // SelectStr is a convenience wrapper around the gorp.SelectStr function.
 func (t *Transaction) SelectStr(query string, args ...interface{}) (string, error) {
-	return "", nil
+	return SelectStr(t, query, args...)
 }
 
 // SelectNullStr is a convenience wrapper around the gorp.SelectNullStr function.
 func (t *Transaction) SelectNullStr(query string, args ...interface{}) (sql.NullString, error) {
-	return sql.NullString{}, nil
+	return SelectNullStr(t, query, args...)
 }
 
 // SelectOne is a convenience wrapper around the gorp.SelectOne function.
 func (t *Transaction) SelectOne(holder interface{}, query string, args ...interface{}) error {
-	return nil
+	return SelectOne(t.dbUtils, t, holder, query, args...)
 }
-
 
 func (t *Transaction) QueryRow(query string, args ...interface{}) *sql.Row {
 
-	return nil
+	return queryRow(t, query, args...)
 }
 
 func (t *Transaction) Query(q string, args ...interface{}) (*sql.Rows, error) {
 
-	return nil, nil
+	return query(t, q, args...)
 }

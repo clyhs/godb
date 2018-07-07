@@ -176,9 +176,11 @@ func rawselect(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{}, quer
 	fmt.Println("-----------------")
 
 	if len(args) == 1 {
+		fmt.Println("args=1")
 		query, args = maybeExpandNamedQuery(dbUtils, query, args)
 	}
 
+	fmt.Println(query)
 	rows, err := queryRunner.Query(query, args...)
 	if err != nil {
 		return nil, err
@@ -277,6 +279,8 @@ func rawselect(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{}, quer
 	}
 
 	fmt.Println("-----------------")
+	//fmt.Println(nonFatalErr)
+	fmt.Println(list)
 	return list, nonFatalErr
 }
 

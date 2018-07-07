@@ -166,8 +166,8 @@ func columnToFieldIndex(m *DbUtils, t reflect.Type,name string, cols []string) (
 			if tableMapped {
 
 				colMap := colMapOrNil(table, fieldName)
-				fmt.Println(colMap)
-				fmt.Println(fieldName)
+				//fmt.Println(colMap)
+				//fmt.Println(fieldName)
 				if colMap != nil {
 					fieldName = colMap.ColumnName
 				}
@@ -258,11 +258,65 @@ func get(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{},
 }
 
 func delete(dbUtils *DbUtils, queryRunner SqlQueryRunner, list ...interface{}) (int64, error) {
-	return 0, nil
+	count := int64(0)
+	for _, ptr := range list {
+		table, elem, err := dbUtils.tableForPointer(ptr, true)
+		if err != nil {
+			return -1, err
+		}
+
+
+		bi, err := table.bindDelete(elem)
+		if err != nil {
+			return -1, err
+		}
+
+		res, err := queryRunner.Exec(bi.query, bi.args...)
+		if err != nil {
+			return -1, err
+		}
+		rows, err := res.RowsAffected()
+		if err != nil {
+			return -1, err
+		}
+
+		count += rows
+
+	}
+
+	return count, nil
 }
 
 func update(dbUtils *DbUtils, queryRunner SqlQueryRunner, list ...interface{}) (int64, error) {
-	return 0, nil
+
+	count := int64(0)
+
+	for _, ptr := range list {
+		table, elem, err := dbUtils.tableForPointer(ptr, true)
+		if err != nil {
+			return -1, err
+		}
+		bi, err := table.bindUpdate(elem)
+
+		if err != nil {
+			return -1, err
+		}
+
+		res, err := queryRunner.Exec(bi.query, bi.args...)
+		if err != nil {
+			return -1, err
+		}
+
+		rows, err := res.RowsAffected()
+		if err != nil {
+			return -1, err
+		}
+
+		count += rows
+	}
+
+
+	return count, nil
 }
 
 func insert(dbUtils *DbUtils, queryRunner SqlQueryRunner, list ...interface{}) error {
@@ -348,6 +402,20 @@ func queryRow(queryRunner SqlQueryRunner, query string, args ...interface{}) *sq
 	return nil
 }
 
+func begin(dbUtils *DbUtils) (*sql.Tx, error) {
+	if dbUtils.ctx != nil {
+		return dbUtils.Db.BeginTx(dbUtils.ctx, nil)
+	}
 
+	return dbUtils.Db.Begin()
+}
 
+func prepare(queryRunner SqlQueryRunner, query string) (*sql.Stmt, error) {
+	dbUtils:=extractDbUtils(queryRunner)
 
+	if dbUtils.ctx != nil {
+		return dbUtils.Db.PrepareContext(dbUtils.ctx, query)
+	}
+
+	return dbUtils.Db.Prepare(query)
+}

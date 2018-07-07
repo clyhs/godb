@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"database/sql/driver"
 	"errors"
+	"time"
 )
 var (
 	DefaultCacheSize = 200
@@ -414,6 +415,24 @@ func (dbUtils *DbUtils) tableForPointer(ptr interface{}, checkPK bool) (*TableMa
 	}
 
 	return t, elem, nil
+}
+
+func (dbUtils *DbUtils) Begin() (*Transaction, error) {
+
+	tx, err := begin(dbUtils)
+	if err != nil {
+		return nil, err
+	}
+	return &Transaction{
+		dbUtils:  dbUtils,
+		tx:       tx,
+		closed:   false,
+	}, nil
+}
+
+func (dbUtils *DbUtils) Prepare(query string) (*sql.Stmt, error) {
+
+	return prepare(dbUtils, query)
 }
 
 
