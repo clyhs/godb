@@ -2,11 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="9da63616-958f-4ad2-af4e-e1bd9d8f4fd6" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/dialect_oracle.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dialect_postgres.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dialect_sqlite.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/db.go" beforeDir="false" afterPath="$PROJECT_DIR$/db.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/select.go" beforeDir="false" afterPath="$PROJECT_DIR$/select.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/table_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/table_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/transaction.go" beforeDir="false" afterPath="$PROJECT_DIR$/transaction.go" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
@@ -32,15 +31,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dialect.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/dialect.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1290">
-              <caret line="86" column="47" selection-start-line="86" selection-start-column="47" selection-end-line="86" selection-end-column="47" />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="godb.go" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/godb.go">
           <provider selected="true" editor-type-id="text-editor">
@@ -59,11 +49,35 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="dialect_mysql.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/dialect_mysql.go">
+      <file leaf-file-name="table_test.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/table_test.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="210">
-              <caret line="15" column="19" lean-forward="true" selection-start-line="15" selection-start-column="19" selection-end-line="15" selection-end-column="19" />
+            <state relative-caret-position="238">
+              <caret line="1289" column="5" lean-forward="true" selection-start-line="1289" selection-start-column="5" selection-end-line="1289" selection-end-column="5" />
+              <folding>
+                <element signature="e#14#185#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dialect_oracle.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dialect_oracle.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="495">
+              <caret line="135" lean-forward="true" selection-start-line="135" selection-end-line="135" />
+              <folding>
+                <element signature="e#14#53#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="dialect_postgres.go" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dialect_postgres.go">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-408">
+              <caret line="100" column="67" selection-start-line="100" selection-start-column="67" selection-end-line="100" selection-end-column="67" />
               <folding>
                 <element signature="e#14#61#0" expanded="true" />
               </folding>
@@ -71,13 +85,13 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="table_test.go" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/table_test.go">
+      <file leaf-file-name="dialect_sqlite.go" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/dialect_sqlite.go">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="101">
-              <caret line="1274" column="31" selection-start-line="1274" selection-start-column="31" selection-end-line="1274" selection-end-column="31" />
+            <state relative-caret-position="163">
+              <caret line="84" column="57" selection-start-line="84" selection-start-column="57" selection-end-line="84" selection-end-column="57" />
               <folding>
-                <element signature="e#14#185#0" expanded="true" />
+                <element signature="e#14#42#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -109,15 +123,6 @@
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="2190">
               <caret line="150" lean-forward="true" selection-start-line="150" selection-end-line="150" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="db_test.go" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/db_test.go">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3690">
-              <caret line="249" column="40" lean-forward="true" selection-start-line="249" selection-start-column="40" selection-end-line="249" selection-end-column="40" />
             </state>
           </provider>
         </entry>
@@ -168,6 +173,9 @@
         <option value="$PROJECT_DIR$/transaction.go" />
         <option value="$PROJECT_DIR$/select.go" />
         <option value="$PROJECT_DIR$/table_test.go" />
+        <option value="$PROJECT_DIR$/dialect_oracle.go" />
+        <option value="$PROJECT_DIR$/dialect_postgres.go" />
+        <option value="$PROJECT_DIR$/dialect_sqlite.go" />
       </list>
     </option>
   </component>
@@ -300,12 +308,6 @@
     </recent_temporary>
   </component>
   <component name="TestHistory">
-    <history-entry file="Test_WithEmbeddedStruct_in_godb - 2018.07.08 at 10h 58m 40s.xml">
-      <configuration name="Test_WithEmbeddedStruct in godb" configurationId="GoTestRunConfiguration" />
-    </history-entry>
-    <history-entry file="TestWithStringPk_in_godb - 2018.07.08 at 15h 02m 06s.xml">
-      <configuration name="TestWithStringPk in godb" configurationId="GoTestRunConfiguration" />
-    </history-entry>
     <history-entry file="TestWithStringPk_in_godb - 2018.07.08 at 15h 02m 44s.xml">
       <configuration name="TestWithStringPk in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
@@ -330,18 +332,24 @@
     <history-entry file="TestInvoicePersonView_in_godb - 2018.07.08 at 15h 27m 20s.xml">
       <configuration name="TestInvoicePersonView in godb" configurationId="GoTestRunConfiguration" />
     </history-entry>
+    <history-entry file="TestSelectTooManyCols_in_godb - 2018.07.08 at 15h 31m 53s.xml">
+      <configuration name="TestSelectTooManyCols in godb" configurationId="GoTestRunConfiguration" />
+    </history-entry>
+    <history-entry file="TestSelectTooManyCols_in_godb - 2018.07.08 at 15h 34m 24s.xml">
+      <configuration name="TestSelectTooManyCols in godb" configurationId="GoTestRunConfiguration" />
+    </history-entry>
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="43" width="1280" height="688" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.25" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="right" id="Database" order="3" />
       <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" visible="true" weight="0.4315961" />
+      <window_info anchor="bottom" id="Run" order="2" visible="true" weight="0.31433225" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="2" side_tool="true" />
@@ -368,27 +376,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/functions_test.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="510">
-          <caret line="34" column="5" selection-start-line="34" selection-start-column="5" selection-end-line="34" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/functions.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="255">
-          <caret line="17" column="5" selection-start-line="17" selection-start-column="5" selection-end-line="17" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/errors.go">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" column="18" selection-start-line="5" selection-start-column="4" selection-end-line="5" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/types.go">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="105">
@@ -725,10 +712,40 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/table_test.go">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="101">
-          <caret line="1274" column="31" selection-start-line="1274" selection-start-column="31" selection-end-line="1274" selection-end-column="31" />
+        <state relative-caret-position="238">
+          <caret line="1289" column="5" lean-forward="true" selection-start-line="1289" selection-start-column="5" selection-end-line="1289" selection-end-column="5" />
           <folding>
             <element signature="e#14#185#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialect_oracle.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="495">
+          <caret line="135" lean-forward="true" selection-start-line="135" selection-end-line="135" />
+          <folding>
+            <element signature="e#14#53#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialect_postgres.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-408">
+          <caret line="100" column="67" selection-start-line="100" selection-start-column="67" selection-end-line="100" selection-end-column="67" />
+          <folding>
+            <element signature="e#14#61#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dialect_sqlite.go">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="163">
+          <caret line="84" column="57" selection-start-line="84" selection-start-column="57" selection-end-line="84" selection-end-column="57" />
+          <folding>
+            <element signature="e#14#42#0" expanded="true" />
           </folding>
         </state>
       </provider>
