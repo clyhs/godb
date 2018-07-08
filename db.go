@@ -73,12 +73,9 @@ func (dbUtils *DbUtils) Select(i interface{}, query string, args ...interface{})
 	return selectlist(dbUtils,dbUtils,i,query,args...)
 }
 
-// Exec runs an arbitrary SQL statement.  args represent the bind parameters.
-// This is equivalent to running:  Exec() using database/sql
+
 func (dbUtils *DbUtils) Exec(query string, args ...interface{}) (sql.Result, error) {
-
 	return maybeExpandNamedQueryAndExec(dbUtils,query,args...)
-
 }
 
 // SelectInt is a convenience wrapper around the gorp.SelectInt function
