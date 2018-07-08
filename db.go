@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"database/sql/driver"
 	"errors"
-	"time"
 )
 var (
 	DefaultCacheSize = 200

@@ -3,6 +3,7 @@ package godb
 import (
 	"context"
 	"database/sql"
+	"fmt"
 )
 
 type Transaction struct {
@@ -82,6 +83,45 @@ func (t *Transaction) SelectNullStr(query string, args ...interface{}) (sql.Null
 // SelectOne is a convenience wrapper around the gorp.SelectOne function.
 func (t *Transaction) SelectOne(holder interface{}, query string, args ...interface{}) error {
 	return SelectOne(t.dbUtils, t, holder, query, args...)
+}
+
+func (t *Transaction) Commit() error {
+	if !t.closed {
+		t.closed = true
+
+		return t.tx.Commit()
+	}
+
+	return sql.ErrTxDone
+}
+
+// Rollback rolls back the underlying database transaction.
+func (t *Transaction) Rollback() error {
+	if !t.closed {
+		t.closed = true
+
+		return t.tx.Rollback()
+	}
+
+	return sql.ErrTxDone
+}
+
+func (t *Transaction) Savepoint(name string) error {
+	query := "savepoint " + t.dbUtils.Dialect.QuoteField(name)
+
+	fmt.Println(query)
+	_, err := maybeExpandNamedQueryAndExec(t, query)
+	return err
+}
+
+// RollbackToSavepoint rolls back to the savepoint with the given name. The
+// name is interpolated directly into the SQL SAVEPOINT statement, so you must
+// sanitize it if it is derived from user input.
+func (t *Transaction) RollbackToSavepoint(savepoint string) error {
+	query := "rollback to savepoint " + t.dbUtils.Dialect.QuoteField(savepoint)
+
+	_, err := maybeExpandNamedQueryAndExec(t, query)
+	return err
 }
 
 func (t *Transaction) QueryRow(query string, args ...interface{}) *sql.Row {

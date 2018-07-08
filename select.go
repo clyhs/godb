@@ -148,6 +148,8 @@ func SelectOne(dbUtils *DbUtils, queryRunner SqlQueryRunner, holder interface{},
 	return selectVal(dbUtils, holder, query, args...)
 }
 
+
+
 func rawselect(dbUtils *DbUtils, queryRunner SqlQueryRunner, i interface{}, query string,
 	args ...interface{}) ([]interface{}, error) {
 

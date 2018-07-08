@@ -71,7 +71,7 @@ type WithCustomDate struct {
 
 type TypeConversionExample struct {
 	Id          int64
-	StudentJSON Student
+	PersonJSON  Person2
 	Name        CustomStringType
 }
 
@@ -80,7 +80,7 @@ type testTypeConverter struct{}
 func (me testTypeConverter) ToDb(val interface{}) (interface{}, error) {
 
 	switch t := val.(type) {
-	case Student:
+	case Person2:
 		b, err := json.Marshal(t)
 		if err != nil {
 			return "", err
@@ -97,7 +97,7 @@ func (me testTypeConverter) ToDb(val interface{}) (interface{}, error) {
 
 func (me testTypeConverter) FromDb(target interface{}) (CustomScanner, bool) {
 	switch target.(type) {
-	case *Student:
+	case *Person2:
 		binder := func(holder, target interface{}) error {
 			s, ok := holder.(*string)
 			if !ok {
@@ -858,6 +858,470 @@ func TestColumnProps(t *testing.T) {
 	}
 }
 
+func Test_Transaction(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(Invoice{}, "invoice_test").SetKeys(true, "Id")
+	dbmap.CreateTablesIfNotExists()
+	defer close(dbmap)
+
+	inv1 := &Invoice{0, 100, 200, "t1", 0, true}
+	inv2 := &Invoice{0, 100, 200, "t2", 0, false}
+
+	trans, err := dbmap.Begin()
+	if err != nil {
+		panic(err)
+	}
+	trans.Insert(inv1, inv2)
+	err = trans.Commit()
+	if err != nil {
+		panic(err)
+	}
+
+	obj, err := dbmap.Get(Invoice{}, inv1.Id)
+	if err != nil {
+		panic(err)
+	}
+	if !reflect.DeepEqual(inv1, obj) {
+		t.Errorf("%v != %v", inv1, obj)
+	}
+	obj, err = dbmap.Get(Invoice{}, inv2.Id)
+	if err != nil {
+		panic(err)
+	}
+	if !reflect.DeepEqual(inv2, obj) {
+		t.Errorf("%v != %v", inv2, obj)
+	}
+}
+
+func Test_Savepoint(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(Invoice{}, "invoice_test").SetKeys(true, "Id")
+	dbmap.CreateTablesIfNotExists()
+	defer close(dbmap)
+
+	inv1 := &Invoice{0, 100, 200, "unpaid", 0, false}
+
+	trans, err := dbmap.Begin()
+	if err != nil {
+		panic(err)
+	}
+	trans.Insert(inv1)
+
+	var checkMemo = func(want string) {
+		memo, err := trans.SelectStr("select " + columnName(dbmap, Invoice{}, "Memo") + " from invoice_test")
+		if err != nil {
+			panic(err)
+		}
+		if memo != want {
+			t.Errorf("%q != %q", want, memo)
+		}
+	}
+	checkMemo("unpaid")
+
+	err = trans.Savepoint("foo")
+	if err != nil {
+		panic(err)
+	}
+	checkMemo("unpaid")
+
+	inv1.Memo = "paid"
+	_, err = trans.Update(inv1)
+	if err != nil {
+		panic(err)
+	}
+	checkMemo("paid")
+
+	err = trans.RollbackToSavepoint("foo")
+	if err != nil {
+		panic(err)
+	}
+	checkMemo("unpaid")
+
+	err = trans.Rollback()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func Test_Multiple(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(Invoice{}, "invoice_test").SetKeys(true, "Id")
+	dbmap.CreateTablesIfNotExists()
+	defer close(dbmap)
+
+	inv1 := &Invoice{0, 100, 200, "a", 0, false}
+	inv2 := &Invoice{0, 100, 200, "b", 0, true}
+	_insert(dbmap, inv1, inv2)
+
+	inv1.Memo = "c"
+	inv2.Memo = "d"
+	_update(dbmap, inv1, inv2)
+
+	count := _del(dbmap, inv1, inv2)
+	if count != 2 {
+		t.Errorf("%d != 2", count)
+	}
+}
+
+type WithIgnoredColumn struct {
+	internal int64 `db:"-"`
+	Id       int64
+	Created  int64
+}
+
+func Test_WithIgnoredColumn(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(WithIgnoredColumn{}, "ignored_column_test").SetKeys(true, "Id")
+	dbmap.CreateTablesIfNotExists()
+	defer close(dbmap)
+
+	ic := &WithIgnoredColumn{-1, 0, 1}
+	_insert(dbmap, ic)
+	expected := &WithIgnoredColumn{0, 1, 1}
+	ic2 := _get(dbmap, WithIgnoredColumn{}, ic.Id).(*WithIgnoredColumn)
+
+	if !reflect.DeepEqual(expected, ic2) {
+		t.Errorf("%v != %v", expected, ic2)
+	}
+	if _del(dbmap, ic) != 1 {
+		t.Errorf("Did not delete row with Id: %d", ic.Id)
+		return
+	}
+	if _get(dbmap, WithIgnoredColumn{}, ic.Id) != nil {
+		t.Errorf("Found id: %d after Delete()", ic.Id)
+	}
+}
+
+func Test_TypeConversionExample(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(Person2{}, "person_test").SetKeys(true, "Id")
+	dbmap.AddTableWithName(TypeConversionExample{}, "type_conv_test").SetKeys(true, "Id")
+	dbmap.TypeConverter = testTypeConverter{}
+	dbmap.CreateTablesIfNotExists()
+
+	defer close(dbmap)
+
+	p := Person2{FName: "Bob", LName: "Smith"}
+	tc := &TypeConversionExample{-1, p, CustomStringType("hi")}
+	_insert(dbmap, tc)
+
+	expected := &TypeConversionExample{1, p, CustomStringType("hi")}
+	tc2 := _get(dbmap, TypeConversionExample{}, tc.Id).(*TypeConversionExample)
+	if !reflect.DeepEqual(expected, tc2) {
+		t.Errorf("tc2 %v != %v", expected, tc2)
+	}
+
+	tc2.Name = CustomStringType("hi2")
+	tc2.PersonJSON = Person2{FName: "Jane", LName: "Doe"}
+	_update(dbmap, tc2)
+
+	expected = &TypeConversionExample{1, tc2.PersonJSON, CustomStringType("hi2")}
+	tc3 := _get(dbmap, TypeConversionExample{}, tc.Id).(*TypeConversionExample)
+	if !reflect.DeepEqual(expected, tc3) {
+		t.Errorf("tc3 %v != %v", expected, tc3)
+	}
+
+	if _del(dbmap, tc) != 1 {
+		t.Errorf("Did not delete row with Id: %d", tc.Id)
+	}
+
+}
+
+type WithEmbeddedStruct struct {
+	Id int64
+	Names
+}
+
+type Names struct {
+	FirstName string
+	LastName  string
+}
+
+
+
+
+func Test_WithEmbeddedStruct(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(WithEmbeddedStruct{}, "embedded_struct_test").SetKeys(true, "Id")
+	dbmap.CreateTablesIfNotExists()
+	defer close(dbmap)
+
+	es := &WithEmbeddedStruct{-1, Names{FirstName: "Alice", LastName: "Smith"}}
+	_insert(dbmap, es)
+	expected := &WithEmbeddedStruct{1, Names{FirstName: "Alice", LastName: "Smith"}}
+	es2 := _get(dbmap, WithEmbeddedStruct{}, es.Id).(*WithEmbeddedStruct)
+	if !reflect.DeepEqual(expected, es2) {
+		t.Errorf("%v != %v", expected, es2)
+	}
+
+	es2.FirstName = "Bob"
+	expected.FirstName = "Bob"
+	_update(dbmap, es2)
+	es2 = _get(dbmap, WithEmbeddedStruct{}, es.Id).(*WithEmbeddedStruct)
+	if !reflect.DeepEqual(expected, es2) {
+		t.Errorf("%v != %v", expected, es2)
+	}
+
+	ess := rawSelect(dbmap, WithEmbeddedStruct{}, "select * from embedded_struct_test")
+	if !reflect.DeepEqual(es2, ess[0]) {
+		t.Errorf("%v != %v", es2, ess[0])
+	}
+}
+
+
+type WithStringPk struct {
+	Id   string
+	Name string
+}
+
+func Test_WithStringPk(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(WithStringPk{}, "string_pk_test").SetKeys(true, "Id")
+	//dbmap.CreateTablesIfNotExists()
+	_, err := dbmap.Exec("create table string_pk_test (Id varchar(255), Name varchar(255));")
+	if err != nil {
+		t.Errorf("couldn't create string_pk_test: %v", err)
+	}
+	defer close(dbmap)
+
+	row := &WithStringPk{"1", "foo"}
+	err = dbmap.Insert(row)
+	if err == nil {
+		t.Errorf("Expected error when inserting into table w/non Int PK and autoincr set true")
+	}
+}
+
+func Test_SqlQueryRunnerInterfaceSelects(t *testing.T) {
+	dbMapType := reflect.TypeOf(&DbUtils{})
+	sqlExecutorType := reflect.TypeOf((*SqlQueryRunner)(nil)).Elem()
+	numDbMapMethods := dbMapType.NumMethod()
+	for i := 0; i < numDbMapMethods; i += 1 {
+		dbMapMethod := dbMapType.Method(i)
+		if !strings.HasPrefix(dbMapMethod.Name, "Select") {
+			continue
+		}
+		if _, found := sqlExecutorType.MethodByName(dbMapMethod.Name); !found {
+			t.Errorf("Method %s is defined on godb.DbUtils but not implemented in SqlQueryRunner",
+				dbMapMethod.Name)
+		}
+	}
+}
+
+
+
+func Test_NullTime(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(WithNullTime{}, "nulltime_test").SetKeys(false, "Id")
+	dbmap.CreateTablesIfNotExists()
+	defer close(dbmap)
+
+	// if time is null
+	ent := &WithNullTime{
+		Id: 0,
+		Time: NullTime{
+			Valid: false,
+		}}
+	err := dbmap.Insert(ent)
+	if err != nil {
+		t.Errorf("failed insert on %s", err.Error())
+	}
+	err = dbmap.SelectOne(ent, `select * from nulltime_test where `+columnName(dbmap, WithNullTime{}, "Id")+`=:Id`, map[string]interface{}{
+		"Id": ent.Id,
+	})
+	if err != nil {
+		t.Errorf("failed select on %s", err.Error())
+	}
+	if ent.Time.Valid {
+		t.Error("NullTime returns valid but expected null.")
+	}
+
+	// if time is not null
+	ts, err := time.Parse(time.Stamp, "Jan 2 15:04:05")
+	ent = &WithNullTime{
+		Id: 1,
+		Time: NullTime{
+			Valid: true,
+			Time:  ts,
+		}}
+	err = dbmap.Insert(ent)
+	if err != nil {
+		t.Errorf("failed insert on %s", err.Error())
+	}
+	err = dbmap.SelectOne(ent, `select * from nulltime_test where `+columnName(dbmap, WithNullTime{}, "Id")+`=:Id`, map[string]interface{}{
+		"Id": ent.Id,
+	})
+	if err != nil {
+		t.Errorf("failed select on %s", err.Error())
+	}
+	if !ent.Time.Valid {
+		t.Error("NullTime returns invalid but expected valid.")
+	}
+	if ent.Time.Time.UTC() != ts.UTC() {
+		t.Errorf("expect %v but got %v.", ts, ent.Time.Time)
+	}
+
+	return
+}
+
+
+
+type Times struct {
+	One time.Time
+	Two time.Time
+}
+
+type EmbeddedTime struct {
+	Id string
+	Times
+}
+
+func Test_WithTime(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(WithTime{}, "time_test").SetKeys(true, "Id")
+	dbmap.CreateTablesIfNotExists()
+	defer close(dbmap)
+
+	t1 := parseTimeOrPanic("2006-01-02 15:04:05 -0700 MST",
+		"2013-08-09 21:30:43 +0800 CST")
+	w1 := WithTime{1, t1}
+	_insert(dbmap, &w1)
+
+	obj := _get(dbmap, WithTime{}, w1.Id)
+	w2 := obj.(*WithTime)
+	if w1.Time.UnixNano() != w2.Time.UnixNano() {
+		t.Errorf("%v != %v", w1, w2)
+	}
+}
+
+func parseTimeOrPanic(format, date string) time.Time {
+	t1, err := time.Parse(format, date)
+	if err != nil {
+		panic(err)
+	}
+	return t1
+}
+
+func Test_EmbeddedTime(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTable(EmbeddedTime{}).SetKeys(false, "Id")
+	defer close(dbmap)
+	err := dbmap.CreateTables()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	time1 := parseTimeOrPanic("2006-01-02 15:04:05", "2013-08-09 21:30:43")
+
+	t1 := &EmbeddedTime{Id: "abc", Times: Times{One: time1, Two: time1.Add(10 * time.Second)}}
+	_insert(dbmap, t1)
+
+	x := _get(dbmap, EmbeddedTime{}, t1.Id)
+	t2, _ := x.(*EmbeddedTime)
+	if t1.One.UnixNano() != t2.One.UnixNano() || t1.Two.UnixNano() != t2.Two.UnixNano() {
+		t.Errorf("%v != %v", t1, t2)
+	}
+}
+
+type InvoicePersonView struct {
+	InvoiceId     int64
+	PersonId      int64
+	Memo          string
+	FName         string
+	LegacyVersion int64
+}
+
+func Test_InvoicePersonView(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(Invoice{}, "invoice_test").SetKeys(true, "Id")
+	dbmap.AddTableWithName(Person2{}, "person_test").SetKeys(true, "Id")
+    dbmap.CreateTablesIfNotExists()
+	defer close(dbmap)
+
+	// Create some rows
+	p1 := &Person2{0, 0, 0, "bob", "smith", 0}
+	dbmap.Insert(p1)
+
+	// notice how we can wire up p1.Id to the invoice easily
+	inv1 := &Invoice{0, 0, 0, "xmas order", p1.Id, false}
+	dbmap.Insert(inv1)
+
+	// Run your query
+	query := "select i." + columnName(dbmap, Invoice{}, "Id") + " InvoiceId, p." + columnName(dbmap, Person{}, "Id") + " PersonId, i." + columnName(dbmap, Invoice{}, "Memo") + ", p." + columnName(dbmap, Person{}, "FName") + " " +
+		"from invoice_test i, person_test p " +
+		"where i." + columnName(dbmap, Invoice{}, "PersonId") + " = p." + columnName(dbmap, Person{}, "Id")
+
+	// pass a slice of pointers to Select()
+	// this avoids the need to type assert after the query is run
+	var list []*InvoicePersonView
+	_, err := dbmap.Select(&list, query)
+	if err != nil {
+		panic(err)
+	}
+
+	// this should test true
+	expected := &InvoicePersonView{inv1.Id, p1.Id, inv1.Memo, p1.FName, 0}
+	if !reflect.DeepEqual(list[0], expected) {
+		t.Errorf("%v != %v", list[0], expected)
+	}
+}
+
+type FNameOnly struct {
+	FName string
+}
+
+func TestSelectTooManyCols(t *testing.T) {
+	dbmap := initDB()
+	dbmap.AddTableWithName(Person2{}, "person_test").SetKeys(true, "Id")
+dbmap.CreateTablesIfNotExists()
+	defer close(dbmap)
+
+	p1 := &Person2{0, 0, 0, "bob", "smith", 0}
+	p2 := &Person2{0, 0, 0, "jane", "doe", 0}
+	_insert(dbmap, p1)
+	_insert(dbmap, p2)
+
+	obj := _get(dbmap, Person2{}, p1.Id)
+	p1 = obj.(*Person2)
+	obj = _get(dbmap, Person2{}, p2.Id)
+	p2 = obj.(*Person2)
+
+	params := map[string]interface{}{
+		"Id": p1.Id,
+	}
+
+	var p3 FNameOnly
+	err := dbmap.SelectOne(&p3, "select * from person_test where "+columnName(dbmap, Person{}, "Id")+"=:Id", params)
+	if err != nil {
+		if !NonFatalError(err) {
+			t.Error(err)
+		}
+	} else {
+		t.Errorf("Non-fatal error expected")
+	}
+
+	if p1.FName != p3.FName {
+		t.Errorf("%v != %v", p1.FName, p3.FName)
+	}
+
+	var pSlice []FNameOnly
+	_, err = dbmap.Select(&pSlice, "select * from person_test order by "+columnName(dbmap, Person{}, "FName")+" asc")
+	if err != nil {
+		if !NonFatalError(err) {
+			t.Error(err)
+		}
+	} else {
+		t.Errorf("Non-fatal error expected")
+	}
+
+	if p1.FName != pSlice[0].FName {
+		t.Errorf("%v != %v", p1.FName, pSlice[0].FName)
+	}
+	if p2.FName != pSlice[1].FName {
+		t.Errorf("%v != %v", p2.FName, pSlice[1].FName)
+	}
+}
+
+
 
 func rawSelect(dbmap *DbUtils, i interface{}, query string, args ...interface{}) []interface{} {
 	list, err := dbmap.Select(i, query, args...)
@@ -914,5 +1378,14 @@ func _update(dbmap *DbUtils, list ...interface{}) int64 {
 	if err != nil {
 		panic(err)
 	}
+	return count
+}
+
+func _del(dbmap *DbUtils, list ...interface{}) int64 {
+	count, err := dbmap.Delete(list...)
+	if err != nil {
+		panic(err)
+	}
+
 	return count
 }
